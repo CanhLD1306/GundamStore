@@ -1,4 +1,5 @@
 using GundamStore.Data;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,16 @@ namespace GundamStore
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddAuthentication()
+                .AddGoogle(GoogleOptions =>
+                {
+                    IConfigurationSection googleAuth = builder.Configuration.GetSection("Authentication:Google");
+
+                    GoogleOptions.ClientId = googleAuth["ClientId"];
+                    GoogleOptions.ClientSecret = googleAuth["ClientSecret"];
+                    GoogleOptions.CallbackPath = "/Google-SignIn";
+                });
 
             var app = builder.Build();
 
@@ -42,9 +53,20 @@ namespace GundamStore
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                  name: "default",
+                  pattern: "{controller=Home}/{action=Index}/{id?}"
+                );
+
+                endpoints.MapControllerRoute(
+                  name: "areas",
+                  pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+                );
+            });
+
             app.MapRazorPages();
 
             app.Run();

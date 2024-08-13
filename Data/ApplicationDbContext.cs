@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using GundamStore.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace GundamStore.Data
@@ -9,5 +10,13 @@ namespace GundamStore.Data
             : base(options)
         {
         }
+
+        public DbSet<Product>? Products { get; set; }
+        public DbSet<Category>? Categories { get; set; }
+        public DbSet<Scale>? Scales { get; set; }
+        public DbSet<ProductImage>? ProductImages { get; set; }
+        public DbSet<OrderItem>? OrderItems { get; set; }
+        public DbSet<Order>? Orders { get; set; }
+        public DbSet<Banner>? Banners { get; set; }
     }
 }
