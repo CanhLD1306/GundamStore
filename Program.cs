@@ -1,4 +1,7 @@
 using GundamStore.Data;
+using GundamStore.Interfaces;
+using GundamStore.Models;
+using GundamStore.Services;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +18,14 @@ namespace GundamStore
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+
+            builder.Services.AddTransient<IEmailSenderService, EmailSenderService>();
+
+            builder.Services.Configure<FirebaseSettings>(builder.Configuration.GetSection("FirebaseSettings"));
+
+            builder.Services.AddTransient<IFirebaseStorageService, FirebaseStorageService>();
+
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)

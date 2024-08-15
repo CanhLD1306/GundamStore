@@ -6,3 +6,16 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<!-- Form to test Firebase upload -->
+<form asp-action="TestFirebaseUpload" asp-controller="Home" method="post" enctype="multipart/form-data">
+    <h3>Test Firebase Upload</h3>
+    <input type="file" name="file" />
+    <button type="submit">Upload File</button>
+</form>
+
+<!-- Form to test email sending -->
+<form asp-action="TestEmailSender" asp-controller="Home" method="post">
+    <h3>Test Email Sender</h3>
+    <button type="submit">Send Test Email</button>
+</form>
