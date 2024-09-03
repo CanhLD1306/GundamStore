@@ -6,7 +6,7 @@ namespace GundamStore.Models
     public class Order
     {
         [Key]
-        public int OrderId { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public int UserId { get; set; }
@@ -16,21 +16,25 @@ namespace GundamStore.Models
 
         [Required]
         [Column(TypeName = "decimal(18, 2)")]
-        public decimal Total { get; set; }
+        public decimal TotalAmount { get; set; }
 
         [Required]
-        public DateTime CreatedAt { get; set; }
+        [MaxLength(255)]
+        public string? ShippingAddress { get; set; }
 
         [Required]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime Created_At { get; set; } = DateTime.UtcNow;
 
         [Required]
-        public int CreatedBy { get; set; }
+        public DateTime Updated_At { get; set; } = DateTime.UtcNow;
 
         [Required]
-        public int UpdatedBy { get; set; }
+        public int Created_By { get; set; }
 
         [Required]
-        public bool IsDeleted { get; set; }
+        public int Updated_By { get; set; }
+
+        [Required]
+        public bool IsDeleted { get; set; } = false;
     }
 }

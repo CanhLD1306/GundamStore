@@ -6,7 +6,7 @@ namespace GundamStore.Models
     public class OrderItem
     {
         [Key]
-        public int OrderItemId { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public int UserId { get; set; }
@@ -22,7 +22,7 @@ namespace GundamStore.Models
 
         [Required]
         [Column(TypeName = "decimal(18, 2)")]
-        public decimal Price { get; set; }
+        public decimal UnitPrice { get; set; }
 
         [Required]
         public DateTime CreatedAt { get; set; }

@@ -1,0 +1,48 @@
+﻿@using GundamStore.ViewModels
+@model GundamStore.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_LoginOrRegisterLayout.cshtml";
+}
+
+<div class="card-body">
+    <div class="text-nowrap logo-img text-center d-block mb-5 w-100">
+        <img src="~/Template/dist/images/logos/logo.png" width="70" alt="">
+    </div>
+    <form asp-action="Register" method="post">
+        <div class="mb-3">
+            <label for="Email" class="form-label">Email</label>
+            <input type="email" asp-for="Email" class="form-control" id="Email" aria-describedby="emailHelp" />
+        </div>
+        <div class="mb-4">
+            <label for="Password" class="form-label">Password</label>
+            <input type="password" asp-for="Password" class="form-control" id="Password" />
+        </div>
+        <div class="mb-4">
+            <label for="ConfirmPassword" class="form-label">Confirm password</label>
+            <input type="password" asp-for="ConfirmPassword" class="form-control" id="ConfirmPassword" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100 py-8 rounded-2">Sign Up</button>
+
+        <div class="position-relative text-center my-2">
+            <p class="mb-0 fs-4 px-3 d-inline-block bg-white z-index-5 position-relative">Or</p>
+            <span class="border-top w-100 position-absolute top-50 start-50 translate-middle"></span>
+        </div>
+        <div class="mb-2 mb-sm-0">
+            <a class="btn btn-white text-dark border fw-normal d-flex align-items-center justify-content-center rounded-2 py-8"
+               href="@Url.Action("GoogleSignUp", "Account")">
+                <img src="~/Template/dist/images/svgs/google-icon.svg" alt="" class="img-fluid me-2" width="18" height="18">
+                <span class="d-none d-sm-block me-1 flex-shrink-0">Sign Up with</span>Google
+            </a>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-center mt-4">
+            <p class="mb-0 text-dark">Already have an Account?</p>
+            <a class="text-primary fw-medium ms-2" asp-controller="Account" asp-action="Login">Sign In</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

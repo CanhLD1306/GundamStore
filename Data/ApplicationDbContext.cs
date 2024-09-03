@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GundamStore.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<User>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -18,5 +18,6 @@ namespace GundamStore.Data
         public DbSet<OrderItem>? OrderItems { get; set; }
         public DbSet<Order>? Orders { get; set; }
         public DbSet<Banner>? Banners { get; set; }
+        public DbSet<Status>? Statuses { get; set; }
     }
 }

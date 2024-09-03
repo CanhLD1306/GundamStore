@@ -1,32 +1,33 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace GundamStore.Models
 {
     public class Category
     {
         [Key]
-        public int CategoryId { get; set; }
+        public int Id { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [MaxLength(255)]
         public string? Name { get; set; }
 
-        [StringLength(1000)]
+        [MaxLength(1000)]
         public string? Description { get; set; }
 
         [Required]
-        public DateTime CreatedAt { get; set; }
+        public DateTime Created_At { get; set; } = DateTime.UtcNow;
 
         [Required]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime Updated_At { get; set; } = DateTime.UtcNow;
 
         [Required]
-        public int CreatedBy { get; set; }
+        public int Created_By { get; set; }
 
         [Required]
-        public int UpdatedBy { get; set; }
+        public int Updated_By { get; set; }
 
         [Required]
-        public bool IsDeleted { get; set; }
+        public bool IsDeleted { get; set; } = false;
     }
 }

@@ -35,7 +35,7 @@ namespace GundamStore.Services
 
             using var mailMessage = new MailMessage
             {
-                From = new MailAddress(_smtpSettings.SenderEmail,_smtpSettings.SenderName),
+                From = new MailAddress(_smtpSettings.SenderEmail, _smtpSettings.SenderName),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true
@@ -49,17 +49,17 @@ namespace GundamStore.Services
             }
             catch (SmtpException smtpEx)
             {
-                // Lỗi liên quan đến SMTP (cấu hình, xác thực, kết nối)
+                // Log and handle SMTP exceptions
                 throw new InvalidOperationException("SMTP Error: " + smtpEx.Message, smtpEx);
             }
             catch (FormatException formatEx)
             {
-                // Lỗi liên quan đến định dạng email không hợp lệ
+                // Log and handle format exceptions
                 throw new InvalidOperationException("Invalid Email Format: " + formatEx.Message, formatEx);
             }
             catch (Exception ex)
             {
-                // Các lỗi khác
+                // Log and handle other exceptions
                 throw new InvalidOperationException("Failed to send email: " + ex.Message, ex);
             }
         }
