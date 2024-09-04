@@ -7,6 +7,8 @@ using GundamStore.Interfaces;
 using GundamStore.Models;
 using GundamStore.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
@@ -82,14 +84,21 @@ namespace GundamStore.Controllers
             return new ChallengeResult("Google", properties);
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> GoogleSignInResponse(string? returnUrl = null, string? remoteError = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
             
             if (remoteError != null)
             {
-                ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
-                return RedirectToAction("Login");
+                if (remoteError.Contains("access_denied") || remoteError.Contains("canceled"))
+                {   
+                    return View("Login");
+                }
+                else
+                {
+                    return View("Login");
+                }
             }
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -146,11 +155,12 @@ namespace GundamStore.Controllers
             return new ChallengeResult("Google", properties);
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> GoogleSignUpResponse(string? returnUrl = null, string? remoteError = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
 
-            if (remoteError != null)
+            if (remoteError == "access_denied" || remoteError == "canceled")
             {
                 ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
                 return RedirectToAction("Register");
@@ -183,8 +193,33 @@ namespace GundamStore.Controllers
                 result = await _userManager.AddLoginAsync(user, info);
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
+                    var roleResult = await _userManager.AddToRoleAsync(user, "Customer");
+                    if (!roleResult.Succeeded)
+                    {
+                        ModelState.AddModelError("", "Failed to assign role to the user.");
+                        foreach (var error in roleResult.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+                        return RedirectToAction("Register");
+                    }
+
+                    user.EmailConfirmed = true;
+                    var updateUser = await _userManager.UpdateAsync(user);
+                    if(updateUser.Succeeded)
+                    {       
+                        // Đăng nhập người dùng và chuyển hướng đến trang chính
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        // Thêm lỗi nếu không thể tạo người dùng
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+                    }
                 }
             }
 
@@ -225,6 +260,18 @@ namespace GundamStore.Controllers
                 {
                     // Cập nhật trạng thái email đã xác thực
                     var user = await _userManager.FindByEmailAsync(email);
+
+                    var roleResult = await _userManager.AddToRoleAsync(user, "Customer");
+                    if (!roleResult.Succeeded)
+                    {
+                        ModelState.AddModelError("", "Failed to assign role to the user.");
+                        foreach (var error in roleResult.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+                        return View(model);
+                    }
+
                     user.EmailConfirmed = true;
                     var updateUser = await _userManager.UpdateAsync(user);
                     if(updateUser.Succeeded)
@@ -263,6 +310,7 @@ namespace GundamStore.Controllers
 
             return View(model);
         }
+        
         public async Task<IActionResult> Logout()
         {
             var user = await _userManager.GetUserAsync(User);
