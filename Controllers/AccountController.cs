@@ -39,7 +39,6 @@ namespace GundamStore.Controllers
         {
             return View(new LoginViewModel());
         }
-
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -83,7 +82,6 @@ namespace GundamStore.Controllers
             var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
             return new ChallengeResult("Google", properties);
         }
-
         [AllowAnonymous]
         public async Task<IActionResult> GoogleSignInResponse(string? returnUrl = null, string? remoteError = null)
         {
@@ -91,14 +89,8 @@ namespace GundamStore.Controllers
             
             if (remoteError != null)
             {
-                if (remoteError.Contains("access_denied") || remoteError.Contains("canceled"))
-                {   
-                    return View("Login");
-                }
-                else
-                {
-                    return View("Login");
-                }
+                    ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
+                    return RedirectToAction("Login");
             }
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -142,7 +134,7 @@ namespace GundamStore.Controllers
                     $"Your verification code is: <strong>{code}</strong>. Please enter this code to complete your registration."
                 );
 
-                return View("ConfirmEmail");
+                return RedirectToAction("VerifyCode", new { type = "register"});
             }
 
             return View(model);
@@ -231,26 +223,26 @@ namespace GundamStore.Controllers
             return RedirectToAction("Register");
         }
 
-        public IActionResult ConfirmEmail()
+        public IActionResult VerifyCode(string type)
         {
-            return View(new ConfirmEmailViewModel());
+            ViewBag.type = type;
+            return View();
         }
-
         [HttpPost]
-        public async Task<IActionResult> ConfirmEmail(ConfirmEmailViewModel model)
+        public async Task<IActionResult> VerifyCodeToRegister(string code)
         {
             // Lấy thông tin từ session
             var email = HttpContext.Session.GetString("Email");
             var password = HttpContext.Session.GetString("Password");
-            var code = HttpContext.Session.GetString("VerifyCode");
+            var verifyCode = HttpContext.Session.GetString("VerifyCode");
 
-            if (email == null || password == null || code == null)
+            if (email == null || password == null || verifyCode == null)
             {
                 ModelState.AddModelError("", "Session expired or invalid.");
-                return View(model);
+                return RedirectToAction("VerifyCode", new { type = "register" });
             }
 
-            if (model.Code == code)
+            if (verifyCode == code)
             {
                 // Tạo mới người dùng với email và password
                 var newUser = new User { UserName = email, Email = email };
@@ -269,7 +261,7 @@ namespace GundamStore.Controllers
                         {
                             ModelState.AddModelError("", error.Description);
                         }
-                        return View(model);
+                        return RedirectToAction("VerifyCode", new {type = "register"});
                     }
 
                     user.EmailConfirmed = true;
@@ -277,9 +269,7 @@ namespace GundamStore.Controllers
                     if(updateUser.Succeeded)
                     {
                         // Xóa thông tin từ session sau khi hoàn tất
-                        HttpContext.Session.Remove("Email");
-                        HttpContext.Session.Remove("Password");
-                        HttpContext.Session.Remove("VerifyCode");
+                        HttpContext.Session.Clear();
                         
                         // Đăng nhập người dùng và chuyển hướng đến trang chính
                         await _signInManager.SignInAsync(user, isPersistent: false);
@@ -308,7 +298,7 @@ namespace GundamStore.Controllers
                 ModelState.AddModelError("", "Invalid verification code.");
             }
 
-            return View(model);
+            return RedirectToAction("Verifycode", new { type = "register" });
         }
         
         public async Task<IActionResult> Logout()
@@ -332,6 +322,71 @@ namespace GundamStore.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        public IActionResult SendEmail()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> SendEmail(string email)
+        {
+            var code = GenerateRandomCode(8, includeSpecialChars: false);
+            HttpContext.Session.SetString("VerifyCode", code);
+            HttpContext.Session.SetString("Email", email);
+            await _emailSenderService.SendEmailAsync(
+                email,
+                "Reset Password",
+                $"Your reset password code is: <strong>{code}</strong>. Please enter this code to reset your password."
+            );
+            return RedirectToAction("Verifycode", new { type = "reset"});
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> VerifyCodeToResetPassword(string code)
+        {
+            var verifyCode = HttpContext.Session.GetString("VerifyCode");
+
+            if (verifyCode == code)
+            {
+                return RedirectToAction("ResetPassword");
+            }
+
+            ModelState.AddModelError("", "Invalid verification code.");
+            return RedirectToAction("VerifyCode", new { type = "reset" });
+        }
+
+        public IActionResult ResetPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(string password)
+        {
+            var email = HttpContext.Session.GetString("Email");
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "User not found.");
+                return RedirectToAction("ResetPassword");
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, password);
+
+            if (result.Succeeded)
+            {
+                HttpContext.Session.Clear();
+                return RedirectToAction("Login");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return RedirectToAction("ResetPassword");
+        }
         private async Task<IActionResult> HandleSuccessfulLogin(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);

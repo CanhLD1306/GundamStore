@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "Verifycode";
+    Layout = "~/Views/Shared/_LoginOrRegisterLayout.cshtml";
+    var type = Request.Query["type"].ToString();
+}
+
+<div class="card-body">
+    <div class="text-nowrap logo-img text-center d-block mb-4 w-100">
+        <img src="~/Template/dist/images/logos/logo.png" width="70" alt="">
+    </div>
+    <h2 class="text-center mb-4">Verify your code</h2>
+
+    @if(type == "register")
+    {
+        <form asp-action="VerifyCodeToRegister" method="post">
+            <input type="text" name="code" class="form-control mb-4">
+            <button type="submit" class="btn btn-primary w-100 py-8 rounded-2">Verify</button
+        </form>
+    }
+    else if(type == "reset")
+    {
+        <form asp-action="VerifyCodeToResetPassword" method="post">
+            <input type="text" name="code" class="form-control mb-4">
+            <button type="submit" class="btn btn-primary w-100 py-8 rounded-2">Verify</button
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

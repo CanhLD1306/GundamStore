@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "Send Email";
+    Layout = "~/Views/Shared/_LoginOrRegisterLayout.cshtml";
+}
+
+<div class="card-body">
+    <div class="text-nowrap logo-img text-center d-block mb-4 w-100">
+        <img src="~/Template/dist/images/logos/logo.png" width="70" alt="">
+    </div>
+    <h2 class="text-center mb-4">Enter your email</h2>
+    <form asp-action="SendEmail" method="post">
+        <input type="email" name="email" class="form-control mb-4">
+        <button type="submit" class="btn btn-primary w-100 py-8 rounded-2">Send email</button
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
