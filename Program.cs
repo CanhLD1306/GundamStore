@@ -3,6 +3,7 @@ using GundamStore.Interfaces;
 using GundamStore.Models;
 using GundamStore.Services;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -66,6 +67,15 @@ namespace GundamStore
                     GoogleOptions.ClientId = googleAuth["ClientId"];
                     GoogleOptions.ClientSecret = googleAuth["ClientSecret"];
                     GoogleOptions.CallbackPath = "/Google-SignIn";
+                    GoogleOptions.Events = new OAuthEvents
+                    {
+                        OnRemoteFailure = context =>
+                        {
+                            context.Response.Redirect("/Account/Login");
+                            context.HandleResponse();
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             var app = builder.Build();

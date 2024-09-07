@@ -12,15 +12,18 @@
     <form asp-action="Register" method="post">
         <div class="mb-3">
             <label for="Email" class="form-label">Email</label>
-            <input type="email" asp-for="Email" class="form-control" id="Email" aria-describedby="emailHelp" />
+            <input type="email" asp-for="Email" class="form-control"/>
+            <span asp-validation-for="Email" class="text-danger"></span>
         </div>
         <div class="mb-4">
             <label for="Password" class="form-label">Password</label>
-            <input type="password" asp-for="Password" class="form-control" id="Password" />
+            <input type="password" asp-for="Password" class="form-control"/>
+            <span asp-validation-for="Password" class="text-danger"></span>
         </div>
         <div class="mb-4">
             <label for="ConfirmPassword" class="form-label">Confirm password</label>
-            <input type="password" asp-for="ConfirmPassword" class="form-control" id="ConfirmPassword" />
+            <input type="password" asp-for="ConfirmPassword" class="form-control"/>
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
         </div>
         <button type="submit" class="btn btn-primary w-100 py-8 rounded-2">Sign Up</button>
 

@@ -1,7 +1,7 @@
 @{
     ViewData["Title"] = "Verifycode";
     Layout = "~/Views/Shared/_LoginOrRegisterLayout.cshtml";
-    var type = Request.Query["type"].ToString();
+    var type = Context.Request.Query["type"].ToString();
 }
 
 <div class="card-body">

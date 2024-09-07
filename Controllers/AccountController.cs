@@ -75,42 +75,7 @@ namespace GundamStore.Controllers
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View(model);
         }
-
-        public IActionResult GoogleLogin(string? returnUrl = null)
-        {
-            var redirectUrl = Url.Action("GoogleSignInResponse", "Account", new { ReturnUrl = returnUrl });
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
-            return new ChallengeResult("Google", properties);
-        }
-        [AllowAnonymous]
-        public async Task<IActionResult> GoogleSignInResponse(string? returnUrl = null, string? remoteError = null)
-        {
-            returnUrl = returnUrl ?? Url.Content("~/");
-            
-            if (remoteError != null)
-            {
-                    ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
-                    return RedirectToAction("Login");
-            }
-
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
-            {
-                return RedirectToAction("Login");
-            }
-
-            var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
-
-            if (user == null)
-            {
-                return RedirectToAction("Login");
-            }
-
-            await _signInManager.SignInAsync(user, isPersistent: false);
-
-            return LocalRedirect(returnUrl);
-        }
-
+        
         public IActionResult Register()
         {
             return View(new RegisterViewModel());
@@ -142,34 +107,52 @@ namespace GundamStore.Controllers
 
         public IActionResult GoogleSignUp(string? returnUrl = null)
         {
-            var redirectUrl = Url.Action("GoogleSignUpResponse", "Account", new { ReturnUrl = returnUrl });
+            var redirectUrl = Url.Action("GoogleResponse", "Account", new { ReturnUrl = returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
             return new ChallengeResult("Google", properties);
         }
 
-        [AllowAnonymous]
-        public async Task<IActionResult> GoogleSignUpResponse(string? returnUrl = null, string? remoteError = null)
+        public IActionResult GoogleLogin(string? returnUrl = null)
+        {
+            var redirectUrl = Url.Action("GoogleResponse", "Account", new { ReturnUrl = returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+            return new ChallengeResult("Google", properties);
+        }
+
+        public async Task<IActionResult> GoogleResponse(string? returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
-
-            if (remoteError == "access_denied" || remoteError == "canceled")
-            {
-                ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
-                return RedirectToAction("Register");
-            }
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                return RedirectToAction("Register");
+                return RedirectToAction("Login");
             }
 
-            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
 
             if (user != null)
             {
-                ModelState.AddModelError(string.Empty, "The account has already been registered. Please log in.");
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return await HandleSuccessfulLogin(user.Email);
+            }
+
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            user = await _userManager.FindByEmailAsync(email);
+
+            if (user != null)
+            {
+                var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                if (addLoginResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return await HandleSuccessfulLogin(user.Email);
+                }
+                ModelState.AddModelError(string.Empty, "Error adding external login.");
+                foreach (var error in addLoginResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
                 return RedirectToAction("Login");
             }
 
@@ -179,45 +162,56 @@ namespace GundamStore.Controllers
                 Email = email,
             };
 
-            var result = await _userManager.CreateAsync(user);
-            if (result.Succeeded)
+            var createResult = await _userManager.CreateAsync(user);
+            if (createResult.Succeeded)
             {
-                result = await _userManager.AddLoginAsync(user, info);
-                if (result.Succeeded)
+                var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                if (addLoginResult.Succeeded)
                 {
                     var roleResult = await _userManager.AddToRoleAsync(user, "Customer");
-                    if (!roleResult.Succeeded)
+                    if (roleResult.Succeeded)
                     {
-                        ModelState.AddModelError("", "Failed to assign role to the user.");
-                        foreach (var error in roleResult.Errors)
+                        user.EmailConfirmed = true;
+                        var updateResult = await _userManager.UpdateAsync(user);
+                        if (updateResult.Succeeded)
                         {
-                            ModelState.AddModelError("", error.Description);
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            return RedirectToAction("ResetPassword");
                         }
-                        return RedirectToAction("Register");
-                    }
-
-                    user.EmailConfirmed = true;
-                    var updateUser = await _userManager.UpdateAsync(user);
-                    if(updateUser.Succeeded)
-                    {       
-                        // Đăng nhập người dùng và chuyển hướng đến trang chính
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return RedirectToAction("Index", "Home");
+                        else
+                        {
+                            ModelState.AddModelError("", "Failed to update user.");
+                            foreach (var error in updateResult.Errors)
+                            {
+                                ModelState.AddModelError("", error.Description);
+                            }
+                        }
                     }
                     else
                     {
-                        // Thêm lỗi nếu không thể tạo người dùng
-                        foreach (var error in result.Errors)
+                        ModelState.AddModelError("", "Failed to assign role.");
+                        foreach (var error in roleResult.Errors)
                         {
                             ModelState.AddModelError("", error.Description);
                         }
                     }
                 }
+                else
+                {
+                    ModelState.AddModelError("", "Failed to add external login.");
+                    foreach (var error in addLoginResult.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
             }
-
-            foreach (var error in result.Errors)
+            else
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                ModelState.AddModelError("", "Failed to create user.");
+                foreach (var error in createResult.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
             }
 
             return RedirectToAction("Register");
@@ -341,7 +335,7 @@ namespace GundamStore.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> VerifyCodeToResetPassword(string code)
+        public IActionResult VerifyCodeToResetPassword(string code)
         {
             var verifyCode = HttpContext.Session.GetString("VerifyCode");
 
@@ -356,37 +350,46 @@ namespace GundamStore.Controllers
 
         public IActionResult ResetPassword()
         {
-            return View();
+            var model = new NewPasswordViewModel();
+            return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ResetPassword(string password)
+        public async Task<IActionResult> ResetPassword(NewPasswordViewModel model)
         {
-            var email = HttpContext.Session.GetString("Email");
-            var user = await _userManager.FindByEmailAsync(email);
-
-            if (user == null)
+            if(ModelState.IsValid && !string.IsNullOrEmpty(model.Password))
             {
-                ModelState.AddModelError("", "User not found.");
-                return RedirectToAction("ResetPassword");
+                if(User?.Identity?.IsAuthenticated == true)
+                {
+                    return await SetPasswordForGoogleSignUp(model.Password);
+                }
+
+                var email = HttpContext.Session.GetString("Email");
+                var user = await _userManager.FindByEmailAsync(email);
+
+                if (user == null)
+                {
+                    ModelState.AddModelError("", "User not found.");
+                    return RedirectToAction("ResetPassword");
+                }
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var result = await _userManager.ResetPasswordAsync(user, token, model.Password);
+                if (result.Succeeded)
+                {
+                    HttpContext.Session.Clear();
+                    return RedirectToAction("Login");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
             }
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var result = await _userManager.ResetPasswordAsync(user, token, password);
-
-            if (result.Succeeded)
-            {
-                HttpContext.Session.Clear();
-                return RedirectToAction("Login");
-            }
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError("", error.Description);
-            }
-
-            return RedirectToAction("ResetPassword");
+            return View(model);
         }
+
         private async Task<IActionResult> HandleSuccessfulLogin(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -435,5 +438,32 @@ namespace GundamStore.Controllers
                 return result.ToString();
             }
         }
-    }
+    
+        private async Task<IActionResult> SetPasswordForGoogleSignUp(string password)
+        {
+            var email = HttpContext.User.Identity?.Name;
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "User not found.");
+                return RedirectToAction("Index", "Home");
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, password);
+
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View();
+        }
+   }
 }
