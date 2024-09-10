@@ -39,7 +39,8 @@ namespace GundamStore.Services
                     .Child(file.FileName)
                     .PutAsync(stream);
 
-                return await uploadTask;
+                var downloadUrl = await uploadTask;
+                return downloadUrl;
             }
             catch (Exception ex)
             {

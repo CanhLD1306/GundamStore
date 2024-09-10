@@ -16,18 +16,17 @@ namespace GundamStore.Models
         public string? Description { get; set; }
 
         [Required]
-        public DateTime Created_At { get; set; } = DateTime.UtcNow;
+        public DateTime Created_At { get; set; }
+        [Required]
+        public DateTime Updated_At { get; set; }
 
         [Required]
-        public DateTime Updated_At { get; set; } = DateTime.UtcNow;
+        public string Created_By { get; set; } = string.Empty;
 
         [Required]
-        public int Created_By { get; set; }
+        public string Updated_By { get; set; } = string.Empty;
 
         [Required]
-        public int Updated_By { get; set; }
-
-        [Required]
-        public bool IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; set; }
     }
 }

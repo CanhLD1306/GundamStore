@@ -9,7 +9,7 @@ namespace GundamStore.Models
     {
 
         [Key]
-        public int ProductId { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [StringLength(255)]
@@ -40,16 +40,16 @@ namespace GundamStore.Models
         public string? Description { get; set; }
 
         [Required]
-        public DateTime CreatedAt { get; set; }
+        public DateTime Created_At { get; set; }
 
         [Required]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime Updated_At { get; set; }
 
         [Required]
-        public int CreatedBy { get; set; }
+        public string Created_By { get; set; } = string.Empty;
 
         [Required]
-        public int UpdatedBy { get; set; }
+        public string Updated_By { get; set; } = string.Empty;
 
         [Required]
         public bool IsDeleted { get; set; }

@@ -9,7 +9,7 @@ namespace GundamStore.Models
         public int Id { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public string? UserId { get; set; }
 
         [Required]
         public int StatusId { get; set; }
@@ -23,18 +23,18 @@ namespace GundamStore.Models
         public string? ShippingAddress { get; set; }
 
         [Required]
-        public DateTime Created_At { get; set; } = DateTime.UtcNow;
+        public DateTime Created_At { get; set; }
 
         [Required]
-        public DateTime Updated_At { get; set; } = DateTime.UtcNow;
+        public DateTime Updated_At { get; set; }
 
         [Required]
-        public int Created_By { get; set; }
+        public string Created_By { get; set; } = string.Empty;
 
         [Required]
-        public int Updated_By { get; set; }
+        public string Updated_By { get; set; } = string.Empty;
 
         [Required]
-        public bool IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; set; }
     }
 }

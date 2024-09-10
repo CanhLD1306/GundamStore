@@ -54,4 +54,27 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            var errorMessage = '@TempData["ErrorMessage"]';
+            var successmessage = '@TempData["SuccessMessage"]';
+            if (errorMessage) {
+                toastr.options = {
+                    "positionClass": "toast-top-center", 
+                    "timeOut": 5000,                   
+                    "showMethod": "slideDown",                    
+                };
+                toastr.error(errorMessage);
+            }
+            if (successmessage) {
+                toastr.options = {
+                    "positionClass": "toast-top-center", 
+                    "timeOut": 5000,                   
+                    "showMethod": "slideDown",                    
+                };
+                toastr.success(successmessage);
+            }
+        });
+    </script>
 }

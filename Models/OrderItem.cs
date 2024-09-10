@@ -9,9 +9,6 @@ namespace GundamStore.Models
         public int Id { get; set; }
 
         [Required]
-        public int UserId { get; set; }
-
-        [Required]
         public int OrderId { get; set; }
 
         [Required]
@@ -22,19 +19,19 @@ namespace GundamStore.Models
 
         [Required]
         [Column(TypeName = "decimal(18, 2)")]
-        public decimal UnitPrice { get; set; }
+        public decimal TotalPrice { get; set; }
 
         [Required]
-        public DateTime CreatedAt { get; set; }
+        public DateTime Created_At { get; set; }
 
         [Required]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime Updated_At { get; set; }
 
         [Required]
-        public int CreatedBy { get; set; }
+        public string Created_By { get; set; } = string.Empty;
 
         [Required]
-        public int UpdatedBy { get; set; }
+        public string Updated_By { get; set; } = string.Empty;
 
         [Required]
         public bool IsDeleted { get; set; }

@@ -30,18 +30,18 @@
             <!-- Sidebar scroll-->
             <div>
                 <div class="brand-logo d-flex align-items-center justify-content-between">
-                    <a href="" class="text-nowrap logo-img">
-                        <img src="~/Template/dist/images/logos/logo.png" class="dark-logo" width="40" alt="" />
+                    <a href="@Url.Action("Index", "Dashboard")" class="text-nowrap logo-img">
+                        <img src="~/Template/dist/images/logos/logo.png" width="40" alt="">
                     </a>
                     <div class="close-btn d-lg-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                         <i class="ti ti-x fs-8 text-muted"></i>
                     </div>
                 </div>
                 <!-- Sidebar navigation-->
-                <nav class="sidebar-nav scroll-sidebar" data-simplebar>
+                <nav class="sidebar-nav scroll-sidebar">
                     <ul id="sidebarnav">
                         <li class="sidebar-item">
-                            <a class="sidebar-link" asp-area="Admin" asp-action="Index" asp-controller="Dashboard" aria-expanded="false">
+                            <a class="sidebar-link" asp-action="Index" asp-controller="Dashboard" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-aperture"></i>
                                 </span>
@@ -49,43 +49,35 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="./index2.html" aria-expanded="false">
+                            <a class="sidebar-link" asp-action="Index" asp-controller="Products" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-shopping-cart"></i>
                                 </span>
-                                <span class="hide-menu">Product</span>
+                                <span class="hide-menu">Products</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="./index3.html" aria-expanded="false">
+                            <a class="sidebar-link" asp-action="Index" asp-controller="Categories" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-currency-dollar"></i>
                                 </span>
-                                <span class="hide-menu">Banner</span>
+                                <span class="hide-menu">Categories</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="./index4.html" aria-expanded="false">
+                            <a class="sidebar-link" asp-action="Index" asp-controller="Scales"  aria-expanded="false">
                                 <span>
                                     <i class="ti ti-cpu"></i>
                                 </span>
-                                <span class="hide-menu">Crypto</span>
+                                <span class="hide-menu">Scales</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="./index5.html" aria-expanded="false">
+                            <a class="sidebar-link" asp-action="Index" asp-controller="Banners"  aria-expanded="false">
                                 <span>
                                     <i class="ti ti-activity-heartbeat"></i>
                                 </span>
-                                <span class="hide-menu">General</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="./index6.html" aria-expanded="false">
-                                <span>
-                                    <i class="ti ti-playlist"></i>
-                                </span>
-                                <span class="hide-menu">Music</span>
+                                <span class="hide-menu">Banners</span>
                             </a>
                         </li>
                     </ul>

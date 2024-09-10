@@ -44,6 +44,13 @@ namespace GundamStore.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if(user == null)
+            {
+                TempData["ErrorMessage"] = "Email does not exist!";
+                return View(model);
+            }
+            
             var result = await _signInManager.PasswordSignInAsync(
                 model.Email,
                 model.Password,
@@ -55,11 +62,13 @@ namespace GundamStore.Controllers
             {
                 if (model.Email != null)
                 {
+                    TempData["SuccessMessage"] = "Login successful !";
                     return await HandleSuccessfulLogin(model.Email);
                 }
                 else
                 {
-                    return BadRequest("Email is required.");
+                    TempData["ErrorMessage"] = "Email or password is incorrect !";
+                    return RedirectToAction("Login");
                 }
             }
             if (result.RequiresTwoFactor)
@@ -72,7 +81,7 @@ namespace GundamStore.Controllers
                 return RedirectToPage("./Lockout");
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            TempData["ErrorMessage"] = "Email or password is incorrect!";
             return View(model);
         }
         
@@ -84,25 +93,29 @@ namespace GundamStore.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {       
-            if (ModelState.IsValid && !string.IsNullOrEmpty(model.Email) && !string.IsNullOrEmpty(model.Password))
+            if(!ModelState.IsValid) return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if(user != null)
             {
-                // Tạm thời lưu thông tin người dùng vào session
-                // Gửi email xác nhận với mã xác nhận
-                var code = GenerateRandomCode(8, includeSpecialChars: false);
-                HttpContext.Session.SetString("Email", model.Email);
-                HttpContext.Session.SetString("Password", model.Password);
-                HttpContext.Session.SetString("VerifyCode", code);
-
-                await _emailSenderService.SendEmailAsync(
-                    model.Email,
-                    "Confirm Your Email",
-                    $"Your verification code is: <strong>{code}</strong>. Please enter this code to complete your registration."
-                );
-
-                return RedirectToAction("VerifyCode", new { type = "register"});
+                TempData["ErrorMessage"] = "Email already exists !";
+                return View(model);
             }
 
-            return View(model);
+            var code = GenerateRandomCode(8, includeSpecialChars: false);
+            HttpContext.Session.SetString("Email", model.Email);
+            HttpContext.Session.SetString("Password", model.Password);
+            HttpContext.Session.SetString("VerifyCode", code);
+
+            await _emailSenderService.SendEmailAsync(
+                model.Email,
+                "Confirm Your Email",
+                $"Your verification code is: <strong>{code}</strong>. Please enter this code to complete your registration."
+            );
+
+            TempData["SuccessMessage"] = "Your verify code has send in your email !";
+            return RedirectToAction("VerifyCode", new { type = "register"});
+
         }
 
         public IActionResult GoogleSignUp(string? returnUrl = null)
@@ -232,29 +245,22 @@ namespace GundamStore.Controllers
 
             if (email == null || password == null || verifyCode == null)
             {
-                ModelState.AddModelError("", "Session expired or invalid.");
+                TempData["ErrorMessage"] = "Session expired or invalid !";
                 return RedirectToAction("VerifyCode", new { type = "register" });
             }
 
             if (verifyCode == code)
             {
-                // Tạo mới người dùng với email và password
                 var newUser = new User { UserName = email, Email = email };
                 var result = await _userManager.CreateAsync(newUser, password);
-
                 if (result.Succeeded)
                 {
-                    // Cập nhật trạng thái email đã xác thực
                     var user = await _userManager.FindByEmailAsync(email);
 
                     var roleResult = await _userManager.AddToRoleAsync(user, "Customer");
                     if (!roleResult.Succeeded)
                     {
-                        ModelState.AddModelError("", "Failed to assign role to the user.");
-                        foreach (var error in roleResult.Errors)
-                        {
-                            ModelState.AddModelError("", error.Description);
-                        }
+                        TempData["ErrorMessage"] = "Failed to assign role to the user !";
                         return RedirectToAction("VerifyCode", new {type = "register"});
                     }
 
@@ -266,35 +272,15 @@ namespace GundamStore.Controllers
                         HttpContext.Session.Clear();
                         
                         // Đăng nhập người dùng và chuyển hướng đến trang chính
+                        TempData["SuccessMessage"] = "Registers successfully !";
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         return RedirectToAction("Index", "Home");
                     }
-                    else
-                    {
-                        // Thêm lỗi nếu không thể tạo người dùng
-                        foreach (var error in result.Errors)
-                        {
-                            ModelState.AddModelError("", error.Description);
-                        }
-                    }
-                }
-                else
-                {
-                    // Thêm lỗi nếu không thể tạo người dùng
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError("", error.Description);
-                    }
                 }
             }
-            else
-            {
-                ModelState.AddModelError("", "Invalid verification code.");
-            }
-
-            return RedirectToAction("Verifycode", new { type = "register" });
+            TempData["ErrorMessage"] = "Invalid verification code !";
+            return RedirectToAction("Verifycode", new { type = "register" });   
         }
-        
         public async Task<IActionResult> Logout()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -331,6 +317,7 @@ namespace GundamStore.Controllers
                 "Reset Password",
                 $"Your reset password code is: <strong>{code}</strong>. Please enter this code to reset your password."
             );
+            TempData["SuccessMessage"] = "Your verify code has send in your email !";
             return RedirectToAction("Verifycode", new { type = "reset"});
         }
 
@@ -341,10 +328,11 @@ namespace GundamStore.Controllers
 
             if (verifyCode == code)
             {
+                TempData["SuccessMessage"] = "Verification code is valid !";
                 return RedirectToAction("ResetPassword");
             }
 
-            ModelState.AddModelError("", "Invalid verification code.");
+            TempData["ErrorMessage"] = "Invalid verification code !";
             return RedirectToAction("VerifyCode", new { type = "reset" });
         }
 
@@ -357,7 +345,7 @@ namespace GundamStore.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetPassword(NewPasswordViewModel model)
         {
-            if(ModelState.IsValid && !string.IsNullOrEmpty(model.Password))
+            if(ModelState.IsValid)
             {
                 if(User?.Identity?.IsAuthenticated == true)
                 {
@@ -369,7 +357,7 @@ namespace GundamStore.Controllers
 
                 if (user == null)
                 {
-                    ModelState.AddModelError("", "User not found.");
+                    TempData["ErrorMessage"] = "User not found. !";
                     return RedirectToAction("ResetPassword");
                 }
 
@@ -377,16 +365,12 @@ namespace GundamStore.Controllers
                 var result = await _userManager.ResetPasswordAsync(user, token, model.Password);
                 if (result.Succeeded)
                 {
+                    TempData["SuccessMessage"] = "Password reset successfully !";
                     HttpContext.Session.Clear();
                     return RedirectToAction("Login");
                 }
-
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
             }
-
+            
             return View(model);
         }
 
