@@ -40,6 +40,9 @@ namespace GundamStore.Models
         public string? Description { get; set; }
 
         [Required]
+        public bool IsActive { get; set; }
+
+        [Required]
         public DateTime Created_At { get; set; }
 
         [Required]

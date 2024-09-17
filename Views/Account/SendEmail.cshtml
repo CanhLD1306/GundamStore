@@ -27,6 +27,7 @@
                     "showMethod": "slideDown",                    
                 };
                 toastr.error(errorMessage);
+                @TempData.Remove("ErrorMessage");
             }
             if (successmessage) {
                 toastr.options = {
@@ -35,6 +36,7 @@
                     "showMethod": "slideDown",                    
                 };
                 toastr.success(successmessage);
+                @TempData.Remove("SuccessMessage");
             }
         });
     </script>

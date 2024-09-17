@@ -4,6 +4,7 @@ using GundamStore.Interfaces;
 using GundamStore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GundamStore.Areas.Admin.Controllers
 {
@@ -14,47 +15,85 @@ namespace GundamStore.Areas.Admin.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IFirebaseStorageService _firebaseStorageService;
 
-        public BannersController(ApplicationDbContext Context, IFirebaseStorageService firebaseStorageService)
+        private readonly ILogger<BannersController> _logger;
+
+        public BannersController(ApplicationDbContext Context, IFirebaseStorageService firebaseStorageService, ILogger<BannersController> logger)
         {
             _context = Context;
             _firebaseStorageService = firebaseStorageService;
+            _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var banners = _context?.Banners?
+            if (_context == null || _context.Banners == null)
+            {
+                return Problem("Database context is not available.");
+            }
+            var banners = await _context.Banners
                             .Where(b => b.IsDeleted == false)
                             .OrderByDescending(b => b.Created_At)
-                            .ToList();
+                            .ToListAsync();
             return View(banners);
         }
+
+        
         [HttpPost]
-        public async Task<IActionResult> CreateBanner(Banner model, IFormFile fileImage)
+        public async Task<IActionResult> CreateBanner(IFormFile fileImage, string description)
         {
             if (ModelState.IsValid)
             {
                 string? imageUrl = null;
+                
+                // Kiểm tra và upload file nếu có
                 if (fileImage != null && fileImage.Length > 0)
                 {
-                    imageUrl = await _firebaseStorageService.UploadFileAsync(fileImage, "banners");
+                    try
+                    {
+                        imageUrl = await _firebaseStorageService.UploadFileAsync(fileImage, "banners");
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log lỗi nếu việc upload thất bại
+                        _logger.LogError("Error uploading image to Firebase: " + ex.Message);
+                        ModelState.AddModelError(string.Empty, "There was an error uploading the image. Please try again.");
+                        return View("Index"); // Trả về view cùng với lỗi
+                    }
                 }
-
-                model.FileImage = imageUrl;
-                model.Created_At = DateTime.UtcNow;
-                model.Updated_At = DateTime.UtcNow;
-                // model.Created_By = GetUserId();
-                // model.Updated_By = GetUserId();
-                model.IsDeleted = false;
-
-                _context?.Banners?.Add(model);
-                if (_context != null)
+                var banner = new Banner
                 {
-                    await _context.SaveChangesAsync();
-                }
+                    // Thiết lập các giá trị khác cho banner
+                    FileImage = imageUrl,
+                    Created_At = DateTime.UtcNow,
+                    Updated_At = DateTime.UtcNow,
+                    Created_By = GetUserId(),
+                    Updated_By = GetUserId(),
+                    IsDeleted = false
+                };
 
-                return RedirectToAction("Index");
+
+                // Lưu vào database
+                try
+                {
+                    _context?.Banners?.Add(banner);
+                    if (_context != null)
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+
+                    TempData["SuccessMessage"] = "Banner created successfully.";
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    // Log lỗi nếu xảy ra lỗi khi lưu vào database
+                    _logger.LogError("Error saving banner to the database: " + ex.Message);
+                    ModelState.AddModelError(string.Empty, "An error occurred while saving the banner. Please try again.");
+                }
             }
 
+            // Nếu có lỗi, trả về lại view cùng với ModelState
+            TempData["ErrorMessage"] = "There was an error creating the banner.";
             return View("Index");
         }
 
@@ -69,7 +108,6 @@ namespace GundamStore.Areas.Admin.Controllers
                     return userIdClaim.Value;
                 }
             }
-
             throw new UnauthorizedAccessException("User is not authenticated.");
         }
     }

@@ -7,6 +7,7 @@ namespace GundamStore.Models
     {
         public int Id { get; set; }
 
+        [Required]
         [MaxLength(255)]
         public string? FileImage { get; set; }
 

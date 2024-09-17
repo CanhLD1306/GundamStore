@@ -13,7 +13,7 @@ namespace GundamStore.ViewModels
 
         [Required(ErrorMessage = "Confirm Password is required.")]
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "The Confirmation password do not match.")]
+        [Compare("Password", ErrorMessage = "The confirm password do not match.")]
         [StringLength(20)]
         public string ConfirmPassword { get; set; } = string.Empty;
     }

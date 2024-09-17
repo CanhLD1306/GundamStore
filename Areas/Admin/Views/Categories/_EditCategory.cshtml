@@ -1,0 +1,34 @@
+@model GundamStore.Models.Category
+
+<div class="modal-header">
+    <h5 class="modal-title">Edit category</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    <div class="compose-box">
+        <div class="compose-content mb-3">
+            <form asp-action="Edit" method="post" id="editCategoryForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Created_At" />
+                <input type="hidden" asp-for="Created_By" />
+                <input type="hidden" asp-for="Updated_At" />
+                <input type="hidden" asp-for="Updated_By" />
+                <input type="hidden" asp-for="IsDeleted" />
+                <div class="col-md-12 mb-3">
+                    <label asp-for="Name">Name</label>
+                    <input type="text" asp-for="Name" class="form-control" required />
+                    <span class="text-danger" id="NameError" style="display: none;">Name is rquired</span>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label asp-for="Description">Description</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-primary" id="editCategoryBtn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

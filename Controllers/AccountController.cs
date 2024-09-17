@@ -35,6 +35,7 @@ namespace GundamStore.Controllers
             _emailSenderService = emailSenderService;
         }
 
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Login()
         {
             return View(new LoginViewModel());
@@ -48,7 +49,7 @@ namespace GundamStore.Controllers
             if(user == null)
             {
                 TempData["ErrorMessage"] = "Email does not exist!";
-                return View(model);
+                return RedirectToAction("Login");
             }
             
             var result = await _signInManager.PasswordSignInAsync(
@@ -62,7 +63,6 @@ namespace GundamStore.Controllers
             {
                 if (model.Email != null)
                 {
-                    TempData["SuccessMessage"] = "Login successful !";
                     return await HandleSuccessfulLogin(model.Email);
                 }
                 else
@@ -85,6 +85,7 @@ namespace GundamStore.Controllers
             return View(model);
         }
         
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Register()
         {
             return View(new RegisterViewModel());
@@ -95,11 +96,13 @@ namespace GundamStore.Controllers
         {       
             if(!ModelState.IsValid) return View(model);
 
+            if(model.Password != model.ConfirmPassword) return View(model);
+
             var user = await _userManager.FindByEmailAsync(model.Email);
             if(user != null)
             {
                 TempData["ErrorMessage"] = "Email already exists !";
-                return View(model);
+                return RedirectToAction("Register");
             }
 
             var code = GenerateRandomCode(8, includeSpecialChars: false);
@@ -345,12 +348,15 @@ namespace GundamStore.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetPassword(NewPasswordViewModel model)
         {
+            if(model.Password != model.ConfirmPassword) return View(model);
+
             if(ModelState.IsValid)
             {
                 if(User?.Identity?.IsAuthenticated == true)
                 {
                     return await SetPasswordForGoogleSignUp(model.Password);
                 }
+
 
                 var email = HttpContext.Session.GetString("Email");
                 var user = await _userManager.FindByEmailAsync(email);
@@ -360,6 +366,7 @@ namespace GundamStore.Controllers
                     TempData["ErrorMessage"] = "User not found. !";
                     return RedirectToAction("ResetPassword");
                 }
+
 
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var result = await _userManager.ResetPasswordAsync(user, token, model.Password);
