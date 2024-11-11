@@ -1,194 +1,167 @@
 using System.Security.Claims;
+using GundamStore.Common;
 using GundamStore.Data;
 using GundamStore.Models;
+using GundamStore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using X.PagedList;
 
 namespace GundamStore.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    //[Area("Admin")]
+    //[Authorize(Roles = "Admin")]
     public class CategoriesController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<User> _userManager;
-        
+        private readonly ICategoryService _categoryService;
 
-        public CategoriesController(ApplicationDbContext context, UserManager<User> userManager)
+        public CategoriesController(ICategoryService categoryService)
         {
-            _context = context;
-            _userManager = userManager;
-        }   
-
-        public IActionResult Index()
+            _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
+        }
+        public async Task<ActionResult> Index(string searhString, int page = 1, int pagesize = 5)
+        {
+            var categories = await _categoryService.ListAllAsync(searhString, page, pagesize);
+            ViewBag.CurrentPage = page;
+            ViewBag.SearchString = searhString;
+            return View(categories);
+        }
+        [HttpGet]
+        public ActionResult Create()
         {
             return View();
         }
+        [HttpPost]
+        public async Task<ActionResult> Create(Category category)
+        {
+            var adminSession = GetAdminSession();
+            if (adminSession == null || adminSession.UserId == null)
+            {
+                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
+                return RedirectToAction("Index");
+            }
 
+            if (string.IsNullOrEmpty(category.Name))
+            {
+                ModelState.AddModelError("category", "Category name is required!");
+                return View("Create");
+            }
+
+            if (ModelState.IsValid)
+            {
+                category.CreatedAt = DateTime.Now;
+                category.UpdatedAt = DateTime.Now;
+                category.CreatedBy = adminSession.UserId;
+                category.UpdatedBy = adminSession.UserId;
+                category.IsDeleted = false;
+
+                if (!await _categoryService.CheckCategoryAsync(category.Name))
+                {
+                    var result = await _categoryService.InsertAsync(category);
+                    if (result > 0)
+                    {
+                        ModelState.AddModelError("categorySuccess", "Category added successfully.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("category", "Failed to add category.");
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("category", "Category name already exists!");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("category", "Invalid data. Please check again.");
+            }
+            return View("Create");
+        }
         [HttpGet]
-        public async Task<IActionResult> ListCategories(string? searchText)
+        public async Task<ActionResult> Edit(long id)
         {
-
-            if (_context == null || _context.Categories == null)
+            var category = await _categoryService.ViewDetailAsync(id);
+            if (category == null)
             {
-                return Problem("Database context is not available.");
+                TempData["ErrorMessage"] = "Category not found.";
+                return RedirectToAction("Index");
             }
-
-
-            var categories = await _context.Categories
-                                        .Where(c => c.IsDeleted == false &&
-                                            (string.IsNullOrEmpty(searchText) || 
-                                            c.Name.ToLower().Contains(searchText) || 
-                                            c.Description.ToLower().Contains(searchText)))
-                                        .OrderByDescending(c => c.Created_At)
-                                        .ToListAsync();
-
-            return PartialView("_ListCategories", categories);
-        }
-
-        public IActionResult Create()
-        {
-            return PartialView("_CreateCategory", new Category());
+            return View(category);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string name, string description)
+        public async Task<ActionResult> Edit(Category category)
         {
-
-            if (_context == null || _context.Categories == null)
+            var adminSession = GetAdminSession();
+            if (adminSession == null || adminSession.UserId == null)
             {
-                return Problem("Database context is not available.");
+                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
+                return RedirectToAction("Index");
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if(userId == null)
+            if (ModelState.IsValid)
             {
-                return Json(new { success = false, message = "User not found." });
+                category.UpdatedAt = DateTime.Now;
+                category.UpdatedBy = adminSession.UserId;
+                var result = await _categoryService.UpdateAsync(category);
+                if (result)
+                {
+                    ModelState.AddModelError("categorySuccess", "Category updated successfully.");
+                }
+                else
+                {
+                    ModelState.AddModelError("category", "Failed to update category.");
+                }
             }
-
-            var category = new Category
+            else
             {
-                Name = name,
-                Description = description,
-                Created_At = DateTime.Now,
-                Updated_At = DateTime.Now,
-                Created_By = userId,
-                Updated_By = userId,
-                IsDeleted = false
-            };
-
-            _context.Add(category);
-            await _context.SaveChangesAsync();
-            return Json(new { success = true });
-        }
-
-        public async Task<IActionResult> Edit(int id)
-        {
-
-            if (_context == null || _context.Categories == null)
-            {
-                return Problem("Database context is not available.");
+                ModelState.AddModelError("category", "Invalid data. Cannot update category.");
             }
-
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return PartialView("_EditCategory", category);
-        }
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Category category)
-        {
-            if (_context == null || _context.Categories == null)
-            {
-                return Problem("Database context is not available.");
-            }
-
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userId == null)
-            {
-                return Json(new { success = false, message = "User not found." });
-            }
-
-            var existingCategory = await _context.Categories.FindAsync(category.Id);
-
-            if (existingCategory == null)
-            {
-                return Json(new { success = false, message = "Category not found." });
-            }
-
-            existingCategory.Name = category.Name;
-            existingCategory.Description = category.Description;
-            existingCategory.Updated_At = DateTime.Now;
-            existingCategory.Updated_By = userId;
-
-            try
-            {
-                _context.Update(existingCategory);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return Json(new { success = false, message = "Error updating category." });
-            }
-
-            return Json(new { success = true });
-
-        }
-        
-        public async Task<IActionResult> Delete(int id)
-        {
-            if (_context == null || _context.Categories == null)
-            {
-                return Problem("Database context is not available.");
-            }
-
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-            return PartialView("_DeleteCategory", category);
+            return View("Edit");
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<ActionResult> Delete(long id, string searchString, int page = 1)
         {
-            if (_context == null || _context.Categories == null)
+            var adminSession = GetAdminSession();
+            if (adminSession == null || adminSession.UserId == null)
             {
-                return Problem("Database context is not available.");
+                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
+                return RedirectToAction("Index");
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if(userId == null)
-            {
-                return Json(new { success = false, message = "User not found." });
-            }
-
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _categoryService.GetCategoryByIdAsync(id);
 
             if (category == null)
             {
-                return Json(new { success = false, message = "Category not found." });
+                TempData["ErrorMessage"] = "Category not found.";
+                return RedirectToAction("Index", new { searchString, page });
             }
 
-            category.Updated_At = DateTime.Now;
-            category.Updated_By = userId;
+            category.UpdatedAt = DateTime.Now;
+            category.UpdatedBy = adminSession.UserId;
             category.IsDeleted = true;
-            _context.Update(category);
-            await _context.SaveChangesAsync();
-            return Json(new { success = true });
+
+            var result = await _categoryService.UpdateAsync(category);
+
+            if (result)
+            {
+                TempData["SuccessMessage"] = "Category deleted successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to delete category.";
+            }
+
+            return RedirectToAction("Index", new { searchString, page });
+        }
+
+        private AdminLogin? GetAdminSession()
+        {
+            return HttpContext.Session.GetObjectFromJson<AdminLogin>(Constant.ADMIN_SESSION);
         }
     }
 }

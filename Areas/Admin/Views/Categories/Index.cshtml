@@ -64,11 +64,11 @@
 
     <script>
         $(document).ready(function () {
-            loadCategories();
+            loadCategories('', 1);
 
             $('#searchInput').on('input', function () {
                 var searchTerm = $(this).val();
-                loadCategories(searchTerm);
+                loadCategories(searchTerm, 1);
             });
             
             toastr.options = {
@@ -187,15 +187,16 @@
                 });
             });
 
-            function loadCategories(searchText) {
+            function loadCategories(searchText, page) {
                 searchText = searchText || '';
+                page = page || 1;
                 $('.loading-overlay').removeClass('d-none');
                 $('.table-container').addClass('d-none');
 
                 $.ajax({
                     url: '@Url.Action("ListCategories", "Categories")',
                     type: 'GET',
-                    data: { searchText: searchText },
+                    data: { searchText: searchText, page: page  },
                     success: function (result) {
                         $('.product-list').html(result);
                     },

@@ -11,10 +11,10 @@
             <form asp-action="Edit" method="post" id="editCategoryForm">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="Id" />
-                <input type="hidden" asp-for="Created_At" />
-                <input type="hidden" asp-for="Created_By" />
-                <input type="hidden" asp-for="Updated_At" />
-                <input type="hidden" asp-for="Updated_By" />
+                <input type="hidden" asp-for="CreatedAt" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <input type="hidden" asp-for="UpdatedAt" />
+                <input type="hidden" asp-for="UpdatedBy" />
                 <input type="hidden" asp-for="IsDeleted" />
                 <div class="col-md-12 mb-3">
                     <label asp-for="Name">Name</label>

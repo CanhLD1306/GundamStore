@@ -31,6 +31,8 @@ namespace GundamStore
 
             builder.Services.AddTransient<IFirebaseStorageService, FirebaseStorageService>();
 
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddDistributedMemoryCache();
