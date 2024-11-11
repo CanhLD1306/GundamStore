@@ -7,158 +7,161 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GundamStore.Data;
 using GundamStore.Models;
+using GundamStore.Common;
 
 namespace GundamStore.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    public class ScalesController : Controller
+    //[Area("Admin")]
+    //[Authorize(Roles = "Admin")]
+    public class ScalesController : BaseController
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IScaleService _scaleService;
 
-        public ScalesController(ApplicationDbContext context)
+        public ScalesController(IScaleService scaleService)
         {
-            _context = context;
+            _scaleService = scaleService ?? throw new ArgumentNullException(nameof(scaleService));
         }
-
-        // GET: Admin/Scales
-        public async Task<IActionResult> Index()
+        public async Task<ActionResult> Index(string searhString, int page = 1, int pagesize = 5)
         {
-              return _context.Scales != null ? 
-                          View(await _context.Scales.ToListAsync()) :
-                          Problem("Entity set 'ApplicationDbContext.Scales'  is null.");
+            var scales = await _scaleService.ListAllAsync(searhString, page, pagesize);
+            ViewBag.CurrentPage = page;
+            ViewBag.SearchString = searhString;
+            return View(scales);
         }
-
-        // GET: Admin/Scales/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Scales == null)
-            {
-                return NotFound();
-            }
-
-            var scale = await _context.Scales
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (scale == null)
-            {
-                return NotFound();
-            }
-
-            return View(scale);
-        }
-
-        // GET: Admin/Scales/Create
-        public IActionResult Create()
+        [HttpGet]
+        public ActionResult Create()
         {
             return View();
         }
-
-        // POST: Admin/Scales/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,Created_At,Updated_At,Created_By,Updated_By,IsDeleted")] Scale scale)
+        public async Task<ActionResult> Create(Scale scale)
         {
-            if (ModelState.IsValid)
+            var adminSession = GetAdminSession();
+            if (adminSession == null || adminSession.UserId == null)
             {
-                _context.Add(scale);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(scale);
-        }
-
-        // GET: Admin/Scales/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Scales == null)
-            {
-                return NotFound();
+                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
+                return RedirectToAction("Index");
             }
 
-            var scale = await _context.Scales.FindAsync(id);
-            if (scale == null)
+            if (string.IsNullOrEmpty(scale.Name))
             {
-                return NotFound();
-            }
-            return View(scale);
-        }
-
-        // POST: Admin/Scales/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Created_At,Updated_At,Created_By,Updated_By,IsDeleted")] Scale scale)
-        {
-            if (id != scale.Id)
-            {
-                return NotFound();
+                ModelState.AddModelError("scale", "Scale name is required!");
+                return View("Create");
             }
 
             if (ModelState.IsValid)
             {
-                try
+                scale.CreatedAt = DateTime.Now;
+                scale.UpdatedAt = DateTime.Now;
+                scale.CreatedBy = adminSession.UserId;
+                scale.UpdatedBy = adminSession.UserId;
+                scale.IsDeleted = false;
+
+                if (!await _scaleService.CheckScaleAsync(scale.Name))
                 {
-                    _context.Update(scale);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ScaleExists(scale.Id))
+                    var result = await _scaleService.InsertAsync(scale);
+                    if (result > 0)
                     {
-                        return NotFound();
+                        ModelState.AddModelError("scaleSuccess", "Scale added successfully.");
                     }
                     else
                     {
-                        throw;
+                        ModelState.AddModelError("scale", "Failed to add scale.");
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                else
+                {
+                    ModelState.AddModelError("scale", "Scale name already exists!");
+                }
             }
-            return View(scale);
-        }
-
-        // GET: Admin/Scales/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Scales == null)
+            else
             {
-                return NotFound();
+                ModelState.AddModelError("scale", "Invalid data. Please check again.");
             }
-
-            var scale = await _context.Scales
-                .FirstOrDefaultAsync(m => m.Id == id);
+            return View("Create");
+        }
+        [HttpGet]
+        public async Task<ActionResult> Edit(long id)
+        {
+            var scale = await _scaleService.ViewDetailAsync(id);
             if (scale == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Scale not found.";
+                return RedirectToAction("Index");
             }
-
             return View(scale);
         }
 
-        // POST: Admin/Scales/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        [HttpPost]
+        public async Task<ActionResult> Edit(Scale scale)
         {
-            if (_context.Scales == null)
+            var adminSession = GetAdminSession();
+            if (adminSession == null || adminSession.UserId == null)
             {
-                return Problem("Entity set 'ApplicationDbContext.Scales'  is null.");
+                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
+                return RedirectToAction("Index");
             }
-            var scale = await _context.Scales.FindAsync(id);
-            if (scale != null)
+
+            if (ModelState.IsValid)
             {
-                _context.Scales.Remove(scale);
+                scale.UpdatedAt = DateTime.Now;
+                scale.UpdatedBy = adminSession.UserId;
+                var result = await _scaleService.UpdateAsync(scale);
+                if (result)
+                {
+                    ModelState.AddModelError("scaleSuccess", "Scale updated successfully.");
+                }
+                else
+                {
+                    ModelState.AddModelError("scale", "Failed to update scale.");
+                }
             }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            else
+            {
+                ModelState.AddModelError("scale", "Invalid data. Cannot update scale.");
+            }
+            return View("Edit");
         }
 
-        private bool ScaleExists(int id)
+        [HttpPost]
+        public async Task<ActionResult> Delete(long id, string searchString, int page = 1)
         {
-          return (_context.Scales?.Any(e => e.Id == id)).GetValueOrDefault();
+            var adminSession = GetAdminSession();
+            if (adminSession == null || adminSession.UserId == null)
+            {
+                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
+                return RedirectToAction("Index");
+            }
+
+            var scale = await _scaleService.GetScaleByIdAsync(id);
+
+            if (scale == null)
+            {
+                TempData["ErrorMessage"] = "Scale not found.";
+                return RedirectToAction("Index", new { searchString, page });
+            }
+
+            scale.UpdatedAt = DateTime.Now;
+            scale.UpdatedBy = adminSession.UserId;
+            scale.IsDeleted = true;
+
+            var result = await _scaleService.UpdateAsync(scale);
+
+            if (result)
+            {
+                TempData["SuccessMessage"] = "Scale deleted successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to delete scale.";
+            }
+
+            return RedirectToAction("Index", new { searchString, page });
+        }
+
+        private AdminLogin? GetAdminSession()
+        {
+            return HttpContext.Session.GetObjectFromJson<AdminLogin>(Constant.ADMIN_SESSION);
         }
     }
 }

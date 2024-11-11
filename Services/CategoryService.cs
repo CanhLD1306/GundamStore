@@ -103,24 +103,24 @@ namespace GundamStore.Services
             return category;
         }
 
-        public async Task<bool> UpdateAsync(Category model)
+        public async Task<bool> UpdateAsync(Category category)
         {
             try
             {
                 CheckCategoriesInitialized();
 
-                var category = await _context.Categories!.FindAsync(model.Id);
+                var existingCategory = await _context.Categories!.FindAsync(category.Id);
 
-                if (category == null || category.IsDeleted)
+                if (existingCategory == null || existingCategory.IsDeleted)
                 {
                     return false;
                 }
 
-                category.Name = model.Name;
-                category.Description = model.Description;
-                category.UpdatedAt = model.UpdatedAt;
-                category.UpdatedBy = model.UpdatedBy;
-                category.IsDeleted = model.IsDeleted;
+                existingCategory.Name = category.Name;
+                existingCategory.Description = category.Description;
+                existingCategory.UpdatedAt = category.UpdatedAt;
+                existingCategory.UpdatedBy = category.UpdatedBy;
+                existingCategory.IsDeleted = category.IsDeleted;
 
                 await _context.SaveChangesAsync();
                 return true;

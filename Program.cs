@@ -20,9 +20,9 @@ namespace GundamStore
 
             // Add services to the container.
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>options.UseSqlServer(connectionString));
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 
-            
+
             builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 
             builder.Services.AddTransient<IEmailSenderService, EmailSenderService>();
@@ -32,6 +32,7 @@ namespace GundamStore
             builder.Services.AddTransient<IFirebaseStorageService, FirebaseStorageService>();
 
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IScaleService, ScaleService>();
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -57,7 +58,7 @@ namespace GundamStore
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();            
+            .AddDefaultTokenProviders();
 
             builder.Services.AddRouting();
             builder.Services.AddRazorPages();

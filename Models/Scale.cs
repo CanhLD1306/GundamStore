@@ -5,7 +5,7 @@ namespace GundamStore.Models
     public class Scale
     {
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [Required]
         [StringLength(255)]
@@ -15,16 +15,15 @@ namespace GundamStore.Models
         public string? Description { get; set; }
 
         [Required]
-        public DateTime Created_At { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         [Required]
-        public DateTime Updated_At { get; set; }
+        public DateTime UpdatedAt { get; set; }
         [Required]
-        public string Created_By { get; set; } = string.Empty;
+        public string? CreatedBy { get; set; }
 
         [Required]
-        public string Updated_By { get; set; } = string.Empty;
-
+        public string? UpdatedBy { get; set; }
         [Required]
         public bool IsDeleted { get; set; }
     }
