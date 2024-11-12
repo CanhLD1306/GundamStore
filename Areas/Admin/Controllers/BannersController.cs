@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using GundamStore.Common;
 using GundamStore.Data;
 using GundamStore.Interfaces;
 using GundamStore.Models;
@@ -8,107 +9,126 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GundamStore.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class BannersController : Controller
+    // [Area("Admin")]
+    // [Authorize(Roles = "Admin")]
+    public class BannersController : BaseController
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IFirebaseStorageService _firebaseStorageService;
-
-        private readonly ILogger<BannersController> _logger;
-
-        public BannersController(ApplicationDbContext Context, IFirebaseStorageService firebaseStorageService, ILogger<BannersController> logger)
+        private readonly IBannerService _bannerService;
+        public BannersController(IBannerService bannerService)
         {
-            _context = Context;
-            _firebaseStorageService = firebaseStorageService;
-            _logger = logger;
+            _bannerService = bannerService ?? throw new ArgumentNullException(nameof(bannerService));
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<ActionResult> Index()
         {
-            if (_context == null || _context.Banners == null)
-            {
-                return Problem("Database context is not available.");
-            }
-            var banners = await _context.Banners
-                            .Where(b => b.IsDeleted == false)
-                            .OrderByDescending(b => b.Created_At)
-                            .ToListAsync();
+            var banners = await _bannerService.ListAllBannersAsync();
             return View(banners);
         }
 
-        
-        [HttpPost]
-        public async Task<IActionResult> CreateBanner(IFormFile fileImage, string description)
+        [HttpGet]
+        public ActionResult Create()
         {
-            if (ModelState.IsValid)
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Create(IFormFile fileImage, string description)
+        {
+            var adminSession = GetAdminSession();
+            if (adminSession == null || adminSession.UserId == null)
             {
-                string? imageUrl = null;
-                
-                // Kiểm tra và upload file nếu có
-                if (fileImage != null && fileImage.Length > 0)
-                {
-                    try
-                    {
-                        imageUrl = await _firebaseStorageService.UploadFileAsync(fileImage, "banners");
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log lỗi nếu việc upload thất bại
-                        _logger.LogError("Error uploading image to Firebase: " + ex.Message);
-                        ModelState.AddModelError(string.Empty, "There was an error uploading the image. Please try again.");
-                        return View("Index"); // Trả về view cùng với lỗi
-                    }
-                }
-                var banner = new Banner
-                {
-                    // Thiết lập các giá trị khác cho banner
-                    FileImage = imageUrl,
-                    Created_At = DateTime.UtcNow,
-                    Updated_At = DateTime.UtcNow,
-                    Created_By = GetUserId(),
-                    Updated_By = GetUserId(),
-                    IsDeleted = false
-                };
-
-
-                // Lưu vào database
-                try
-                {
-                    _context?.Banners?.Add(banner);
-                    if (_context != null)
-                    {
-                        await _context.SaveChangesAsync();
-                    }
-
-                    TempData["SuccessMessage"] = "Banner created successfully.";
-                    return RedirectToAction("Index");
-                }
-                catch (Exception ex)
-                {
-                    // Log lỗi nếu xảy ra lỗi khi lưu vào database
-                    _logger.LogError("Error saving banner to the database: " + ex.Message);
-                    ModelState.AddModelError(string.Empty, "An error occurred while saving the banner. Please try again.");
-                }
+                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
+                return RedirectToAction("Index");
             }
 
-            // Nếu có lỗi, trả về lại view cùng với ModelState
-            TempData["ErrorMessage"] = "There was an error creating the banner.";
+            if (fileImage == null)
+            {
+                ModelState.AddModelError("Banner", "Image is required!");
+                return View("Create", new Banner { Description = description });
+            }
+
+            var result = await _bannerService.CreateBannerAsync(fileImage, description, adminSession.UserId);
+
+            if (result > 0)
+            {
+                TempData["bannerSuccess"] = "Banner created successfully.";
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                ModelState.AddModelError("banner", "Failed to create banner.");
+            }
+            return View("Create");
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Edit(long id)
+        {
+            var banner = await _bannerService.GetBannerByIdAsync(id);
+            if (banner == null)
+            {
+                TempData["ErrorMessage"] = "Banner not found.";
+                return RedirectToAction("Index");
+            }
+            return View(banner);
+        }
+
+        public async Task<ActionResult> Edit(long id, IFormFile fileImage, string description)
+        {
+            var adminSession = GetAdminSession();
+            if (adminSession == null || adminSession.UserId == null)
+            {
+                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
+                return RedirectToAction("Index");
+            }
+
+            if (fileImage == null)
+            {
+                ModelState.AddModelError("Banner", "Image is required!");
+                return View("Create", new Banner { Description = description });
+            }
+
+            var result = await _bannerService.UpdateBannerAsync(id, fileImage, description, adminSession.UserId);
+
+            if (result)
+            {
+                TempData["bannerSuccess"] = "Banner updated successfully.";
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                ModelState.AddModelError("banner", "Failed to update banner.");
+            }
+
+            return View("Edit");
+        }
+
+        public async Task<ActionResult> Delete(long id)
+        {
+            var adminSession = GetAdminSession();
+            if (adminSession == null || adminSession.UserId == null)
+            {
+                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
+                return RedirectToAction("Index");
+            }
+
+            var result = await _bannerService.DeleteBannerAsync(id, adminSession.UserId);
+
+            if (result)
+            {
+                TempData["bannerSuccess"] = "Banner deleted successfully.";
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                ModelState.AddModelError("banner", "Failed to delete banner.");
+            }
             return View("Index");
         }
 
-
-        private string GetUserId()
+        private AdminLogin? GetAdminSession()
         {
-            if (User?.Identity?.IsAuthenticated ?? false)
-            {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim != null)
-                {
-                    return userIdClaim.Value;
-                }
-            }
-            throw new UnauthorizedAccessException("User is not authenticated.");
+            return HttpContext.Session.GetObjectFromJson<AdminLogin>(Constant.ADMIN_SESSION);
         }
     }
 }

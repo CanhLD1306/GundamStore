@@ -16,7 +16,6 @@ namespace GundamStore.Services
 
         public async Task<List<Category>> ListAllAsync()
         {
-            CheckCategoriesInitialized();
             return await (_context.Categories!
                             .Where(c => !c.IsDeleted)
                             .OrderByDescending(c => c.CreatedAt)
@@ -25,7 +24,6 @@ namespace GundamStore.Services
 
         public async Task<List<Category>> ListAllCategoryAsync(int top)
         {
-            CheckCategoriesInitialized();
             return await (_context.Categories!
                             .Where(c => !c.IsDeleted)
                             .OrderByDescending(c => c.CreatedAt)
@@ -35,7 +33,6 @@ namespace GundamStore.Services
 
         public async Task<IPagedList<Category>> ListAllAsync(string searchString, int page, int pageSize)
         {
-            CheckCategoriesInitialized();
 
             IQueryable<Category> category = _context.Categories!.Where(c => !c.IsDeleted);
 
@@ -54,16 +51,14 @@ namespace GundamStore.Services
 
         public async Task<bool> CheckCategoryAsync(string categoryName)
         {
-            CheckCategoriesInitialized();
 
             return await _context.Categories!.AnyAsync(c => !c.IsDeleted
                                                         && c.Name != null
                                                         && c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public async Task<long> InsertAsync(Category category)
+        public async Task<long> CreateCategoryAsync(Category category)
         {
-            CheckCategoriesInitialized();
 
             if (category == null)
             {
@@ -74,28 +69,47 @@ namespace GundamStore.Services
             await _context.SaveChangesAsync();
             return category.Id;
         }
-
         public async Task<Category> GetCategoryByIdAsync(long id)
         {
-            CheckCategoriesInitialized();
 
-            var category = await _context.Categories!.FindAsync(id);
+            var category = await _context.Categories!.Where(c => !c.IsDeleted && c.Id == id)
+                                                    .FirstOrDefaultAsync();
 
-            if (category == null || category.IsDeleted)
+            if (category == null)
             {
                 throw new KeyNotFoundException($"Category with ID {id} not found.");
             }
 
             return category;
+        }
+
+        public async Task<bool> UpdateCategoryAsync(Category category)
+        {
+
+            var existingCategory = await _context.Categories!.Where(c => !c.IsDeleted && c.Id == category.Id)
+                                                                .FirstOrDefaultAsync();
+
+            if (existingCategory == null)
+            {
+                throw new KeyNotFoundException($"Banner with ID {category.Id} not found.");
+            }
+
+            existingCategory.Name = category.Name;
+            existingCategory.Description = category.Description;
+            existingCategory.UpdatedAt = category.UpdatedAt;
+            existingCategory.UpdatedBy = category.UpdatedBy;
+            existingCategory.IsDeleted = category.IsDeleted;
+
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<Category> ViewDetailAsync(long id)
         {
-            CheckCategoriesInitialized();
+            var category = await _context.Categories!.Where(c => !c.IsDeleted && c.Id == id)
+                                                    .FirstOrDefaultAsync();
 
-            var category = await _context.Categories!.FindAsync(id);
-
-            if (category == null || category.IsDeleted)
+            if (category == null)
             {
                 throw new KeyNotFoundException($"Category with ID {id} not found.");
             }
@@ -103,40 +117,5 @@ namespace GundamStore.Services
             return category;
         }
 
-        public async Task<bool> UpdateAsync(Category category)
-        {
-            try
-            {
-                CheckCategoriesInitialized();
-
-                var existingCategory = await _context.Categories!.FindAsync(category.Id);
-
-                if (existingCategory == null || existingCategory.IsDeleted)
-                {
-                    return false;
-                }
-
-                existingCategory.Name = category.Name;
-                existingCategory.Description = category.Description;
-                existingCategory.UpdatedAt = category.UpdatedAt;
-                existingCategory.UpdatedBy = category.UpdatedBy;
-                existingCategory.IsDeleted = category.IsDeleted;
-
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private void CheckCategoriesInitialized()
-        {
-            if (_context?.Categories == null)
-            {
-                throw new InvalidOperationException("Categories DbSet is not initialized.");
-            }
-        }
     }
 }

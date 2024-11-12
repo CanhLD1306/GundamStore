@@ -59,7 +59,7 @@ namespace GundamStore.Areas.Admin.Controllers
 
                 if (!await _categoryService.CheckCategoryAsync(category.Name))
                 {
-                    var result = await _categoryService.InsertAsync(category);
+                    var result = await _categoryService.CreateCategoryAsync(category);
                     if (result > 0)
                     {
                         ModelState.AddModelError("categorySuccess", "Category added successfully.");
@@ -106,7 +106,7 @@ namespace GundamStore.Areas.Admin.Controllers
             {
                 category.UpdatedAt = DateTime.Now;
                 category.UpdatedBy = adminSession.UserId;
-                var result = await _categoryService.UpdateAsync(category);
+                var result = await _categoryService.UpdateCategoryAsync(category);
                 if (result)
                 {
                     ModelState.AddModelError("categorySuccess", "Category updated successfully.");
@@ -145,7 +145,7 @@ namespace GundamStore.Areas.Admin.Controllers
             category.UpdatedBy = adminSession.UserId;
             category.IsDeleted = true;
 
-            var result = await _categoryService.UpdateAsync(category);
+            var result = await _categoryService.UpdateCategoryAsync(category);
 
             if (result)
             {
