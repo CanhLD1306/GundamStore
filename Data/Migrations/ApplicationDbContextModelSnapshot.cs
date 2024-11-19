@@ -57,7 +57,7 @@ namespace GundamStore.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Banners");
+                    b.ToTable("Banners", (string)null);
                 });
 
             modelBuilder.Entity("GundamStore.Models.Category", b =>
@@ -96,7 +96,7 @@ namespace GundamStore.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("GundamStore.Models.Order", b =>
@@ -141,7 +141,7 @@ namespace GundamStore.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("GundamStore.Models.OrderItem", b =>
@@ -187,7 +187,7 @@ namespace GundamStore.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("GundamStore.Models.Product", b =>
@@ -256,7 +256,7 @@ namespace GundamStore.Data.Migrations
 
                     b.HasIndex("ScaleId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("GundamStore.Models.ProductImage", b =>
@@ -299,7 +299,7 @@ namespace GundamStore.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages");
+                    b.ToTable("ProductImages", (string)null);
                 });
 
             modelBuilder.Entity("GundamStore.Models.Scale", b =>
@@ -338,7 +338,7 @@ namespace GundamStore.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Scales");
+                    b.ToTable("Scales", (string)null);
                 });
 
             modelBuilder.Entity("GundamStore.Models.User", b =>
@@ -564,7 +564,7 @@ namespace GundamStore.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Statuses");
+                    b.ToTable("Statuses", (string)null);
                 });
 
             modelBuilder.Entity("GundamStore.Models.OrderItem", b =>

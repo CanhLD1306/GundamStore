@@ -1,0 +1,30 @@
+@model IEnumerable<GundamStore.Models.Banner>
+
+<div class="table-responsive border rounded">
+  <table class="table align-middle text-nowrap mb-0">
+    <thead>
+      <tr>
+        <th scope="col">
+          <h6 class="fs-3 fw-semibold mb-0">Banner</h6>
+        </th>
+        <th scope="col">
+          <h6 class="fs-3 fw-semibold mb-0">Description</h6>
+        </th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach (var banner in Model)
+      {
+        <tr>
+          <td><img src="@banner.ImageURL" alt="Banner Image" style="max-width: 100px; height: auto;" /></td>
+          <td>@banner.Description</td>
+          <td>
+            <button id="EditBtn" class="btn btn-warning">Edit</button>
+            <button id="DeleteBtn" class="btn btn-danger">Delete</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

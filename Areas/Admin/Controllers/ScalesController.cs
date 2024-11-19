@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GundamStore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ using GundamStore.Common;
 
 namespace GundamStore.Areas.Admin.Controllers
 {
-    //[Area("Admin")]
+    [Area("Admin")]
     //[Authorize(Roles = "Admin")]
     public class ScalesController : BaseController
     {
@@ -36,12 +37,7 @@ namespace GundamStore.Areas.Admin.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(Scale scale)
         {
-            var adminSession = GetAdminSession();
-            if (adminSession == null || adminSession.UserId == null)
-            {
-                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
-                return RedirectToAction("Index");
-            }
+
 
             if (string.IsNullOrEmpty(scale.Name))
             {
@@ -53,8 +49,6 @@ namespace GundamStore.Areas.Admin.Controllers
             {
                 scale.CreatedAt = DateTime.Now;
                 scale.UpdatedAt = DateTime.Now;
-                scale.CreatedBy = adminSession.UserId;
-                scale.UpdatedBy = adminSession.UserId;
                 scale.IsDeleted = false;
 
                 if (!await _scaleService.CheckScaleAsync(scale.Name))
@@ -95,17 +89,11 @@ namespace GundamStore.Areas.Admin.Controllers
         [HttpPost]
         public async Task<ActionResult> Edit(Scale scale)
         {
-            var adminSession = GetAdminSession();
-            if (adminSession == null || adminSession.UserId == null)
-            {
-                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
-                return RedirectToAction("Index");
-            }
+
 
             if (ModelState.IsValid)
             {
                 scale.UpdatedAt = DateTime.Now;
-                scale.UpdatedBy = adminSession.UserId;
                 var result = await _scaleService.UpdateAsync(scale);
                 if (result)
                 {
@@ -126,12 +114,6 @@ namespace GundamStore.Areas.Admin.Controllers
         [HttpPost]
         public async Task<ActionResult> Delete(long id, string searchString, int page = 1)
         {
-            var adminSession = GetAdminSession();
-            if (adminSession == null || adminSession.UserId == null)
-            {
-                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
-                return RedirectToAction("Index");
-            }
 
             var scale = await _scaleService.GetScaleByIdAsync(id);
 
@@ -142,7 +124,7 @@ namespace GundamStore.Areas.Admin.Controllers
             }
 
             scale.UpdatedAt = DateTime.Now;
-            scale.UpdatedBy = adminSession.UserId;
+
             scale.IsDeleted = true;
 
             var result = await _scaleService.UpdateAsync(scale);
@@ -159,9 +141,5 @@ namespace GundamStore.Areas.Admin.Controllers
             return RedirectToAction("Index", new { searchString, page });
         }
 
-        private AdminLogin? GetAdminSession()
-        {
-            return HttpContext.Session.GetObjectFromJson<AdminLogin>(Constant.ADMIN_SESSION);
-        }
     }
 }

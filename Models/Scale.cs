@@ -8,10 +8,10 @@ namespace GundamStore.Models
         public long Id { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [MaxLength(255)]
         public string? Name { get; set; }
 
-        [StringLength(1000)]
+        [MaxLength(500)]
         public string? Description { get; set; }
 
         [Required]

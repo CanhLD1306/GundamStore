@@ -1,6 +1,7 @@
 using GundamStore.Data;
 using GundamStore.Interfaces;
 using GundamStore.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GundamStore.Services
@@ -11,11 +12,14 @@ namespace GundamStore.Services
 
         private readonly IFirebaseStorageService _firebaseStorageService;
 
+        private readonly IUserService _userService;
+
         private const string BannerFolder = "Banner";
 
-        public BannerService(ApplicationDbContext context, IFirebaseStorageService firebaseStorageService)
+        public BannerService(ApplicationDbContext context, IUserService userService, IFirebaseStorageService firebaseStorageService)
         {
             _context = context ?? throw new InvalidOperationException("Context is not initialized.");
+            _userService = userService ?? throw new InvalidOperationException("UserService is not initialized.");
             _firebaseStorageService = firebaseStorageService ?? throw new InvalidOperationException("FirebaseStorageService is not initialized.");
         }
 
@@ -41,7 +45,7 @@ namespace GundamStore.Services
             return banner;
         }
 
-        public async Task<long> CreateBannerAsync(IFormFile fileImage, string description, string userId)
+        public async Task<long> CreateBannerAsync(IFormFile fileImage, string description)
         {
             var banners = await ListAllBannersAsync();
 
@@ -55,16 +59,21 @@ namespace GundamStore.Services
                 throw new ArgumentException("File image is required.", nameof(fileImage));
             }
 
+            if (!fileImage.ContentType.StartsWith("image/"))
+            {
+                throw new ArgumentException("The file is invalid. Please upload an image file.");
+            }
+
             var imageUrl = await _firebaseStorageService.UploadFileAsync(fileImage, BannerFolder);
 
             var banner = new Banner
             {
-                FileImage = imageUrl,
+                ImageURL = imageUrl,
                 Description = description,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
-                CreatedBy = userId,
-                UpdatedBy = userId,
+                CreatedBy = await _userService.GetUserId(),
+                UpdatedBy = await _userService.GetUserId(),
                 IsDeleted = false
             };
 
@@ -74,7 +83,7 @@ namespace GundamStore.Services
 
         }
 
-        public async Task<bool> UpdateBannerAsync(long id, IFormFile fileImage, string description, string userId)
+        public async Task<bool> UpdateBannerAsync(long id, IFormFile fileImage, string description)
         {
             var banner = await _context.Banners!.Where(b => !b.IsDeleted && b.Id == id)
                                                     .FirstOrDefaultAsync();
@@ -90,16 +99,20 @@ namespace GundamStore.Services
             }
             else
             {
+                if (!fileImage.ContentType.StartsWith("image/"))
+                {
+                    throw new ArgumentException("The file is invalid. Please upload an image file.");
+                }
                 var imageUrl = await _firebaseStorageService.UploadFileAsync(fileImage, BannerFolder);
-                banner.FileImage = imageUrl;
+                banner.ImageURL = imageUrl;
             }
             banner.UpdatedAt = DateTime.Now;
-            banner.UpdatedBy = userId;
+            banner.UpdatedBy = await _userService.GetUserId();
             await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<bool> DeleteBannerAsync(long id, string userId)
+        public async Task<bool> DeleteBannerAsync(long id)
         {
             var banner = await _context.Banners!.Where(b => !b.IsDeleted && b.Id == id)
                                                     .FirstOrDefaultAsync();
@@ -111,7 +124,7 @@ namespace GundamStore.Services
 
 
             banner.UpdatedAt = DateTime.Now;
-            banner.UpdatedBy = userId;
+            banner.UpdatedBy = await _userService.GetUserId();
             banner.IsDeleted = true;
             await _context.SaveChangesAsync();
             return true;

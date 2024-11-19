@@ -1,5 +1,6 @@
 using GundamStore.Data;
 using GundamStore.Models;
+using GundamStore.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList;
 
@@ -16,19 +17,19 @@ namespace GundamStore.Services
 
         public async Task<List<Category>> ListAllAsync()
         {
-            return await (_context.Categories!
+            return await _context.Categories!
                             .Where(c => !c.IsDeleted)
                             .OrderByDescending(c => c.CreatedAt)
-                            .ToListAsync() ?? Task.FromResult(new List<Category>()));
+                            .ToListAsync();
         }
 
         public async Task<List<Category>> ListAllCategoryAsync(int top)
         {
-            return await (_context.Categories!
+            return await _context.Categories!
                             .Where(c => !c.IsDeleted)
                             .OrderByDescending(c => c.CreatedAt)
                             .Take(top)
-                            .ToListAsync() ?? Task.FromResult(new List<Category>()));
+                            .ToListAsync();
         }
 
         public async Task<IPagedList<Category>> ListAllAsync(string searchString, int page, int pageSize)

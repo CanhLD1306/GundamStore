@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Verifyotp";
+    Layout = "~/Views/Shared/_LoginOrRegisterLayout.cshtml";
+    var type = Context.Request.Query["type"].ToString();
+}
+
+<div class="card-body">
+    <div class="text-nowrap logo-img text-center d-block mb-4 w-100">
+        <img src="~/Template/dist/images/logos/logo.png" width="70" alt="">
+    </div>
+    <h2 class="text-center mb-4">Verify your otp</h2>
+
+    <form>
+        <input id="OTP" name="OTP" type="text" class="form-control">
+        <span id="OTPError" class="text-danger"></span>
+        <button type="button" class="btn btn-primary w-100 py-8 rounded-2 mt-4" onclick="VerifyOTP()">Verify</button>
+    </form>
+</div>
+
+@section Scripts {
+
+    <script>
+        var type = '@type';
+        if (type == "register") {
+            var Url = '@Url.Action("VerifyOtpToRegister", "Account")';
+        } else if (type == "reset") {
+            var Url = '@Url.Action("VerifyOtpToResetPassword", "Account")';
+        }
+    </script>
+}

@@ -1,11 +1,12 @@
 using GundamStore.Data;
-using GundamStore.Interfaces;
 using GundamStore.Models;
 using GundamStore.Services;
+using GundamStore.Interfaces;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GundamStore
@@ -33,13 +34,15 @@ namespace GundamStore
 
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IScaleService, ScaleService>();
+            builder.Services.AddScoped<IBannerService, BannerService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.IdleTimeout = TimeSpan.FromMinutes(15);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });

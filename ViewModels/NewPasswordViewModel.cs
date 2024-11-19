@@ -7,7 +7,7 @@ namespace GundamStore.ViewModels
         [Required(ErrorMessage = "Password is required.")]
         [DataType(DataType.Password)]
         [StringLength(20, MinimumLength = 8, ErrorMessage = "Password must be between 8-20 characters")]
-        [RegularExpression(@"(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w\d\s]).{8,}", 
+        [RegularExpression(@"(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w\d\s]).{8,}",
         ErrorMessage = "Password must have at least one digit, one lowercase letter, one uppercase letter, and one special character.")]
         public string Password { get; set; } = string.Empty;
 

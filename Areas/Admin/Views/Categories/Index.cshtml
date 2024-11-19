@@ -40,175 +40,30 @@
 </div>
 
 <div class="product-list"></div>
-
-<div id="createCategoryModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog  modal-dialog-centered" role="document">
-        <div class="modal-content"></div>
-    </div>
-</div>
-
-<div id="editCategoryModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog  modal-dialog-centered" role="document">
-        <div class="modal-content"></div>
-    </div>
-</div>
-
-<div id="deleteCategoryModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog  modal-dialog-centered" role="document">
-        <div class="modal-content"></div>
+<div class="table-container mb-3">
+    <div class="table-responsive border rounded">
+        <table class="table align-middle text-nowrap mb-0">
+            <thead class="text-dark fs-3">
+                <tr>
+                    <th scope="col">
+                        <h6 class="fs-3 fw-semibold mb-0">Category</h6>
+                    </th>
+                    <th scope="col">
+                        <h6 class="fs-3 fw-semibold mb-0">Description</h6>
+                    </th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                
+            </tbody>
+        </table>
     </div>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
 
     <script>
-        $(document).ready(function () {
-            loadCategories('', 1);
-
-            $('#searchInput').on('input', function () {
-                var searchTerm = $(this).val();
-                loadCategories(searchTerm, 1);
-            });
-            
-            toastr.options = {
-                "positionClass": "toast-top-center", 
-                "timeOut": 3000,                   
-                "showMethod": "slideDown",                    
-            };
-
-            // Open Create Modal
-            $(document).on('click', '.btn-add', function () {
-                $.get('/Admin/Categories/Create/', function (data) {
-                    $('#createCategoryModal .modal-content').html(data);
-                    $('#createCategoryModal').modal('show');
-                });
-            });
-
-            // Open Edit Modal
-            $(document).on('click', '.btn-edit', function () {
-                var id = $(this).data('id');
-                $.get('/Admin/Categories/Edit/' + id, function (data) {
-                    $('#editCategoryModal .modal-content').html(data);
-                    $('#editCategoryModal').modal('show');
-                });
-            });
-
-            // Open Delete Modal
-            $(document).on('click', '.btn-delete', function () {
-                var id = $(this).data('id');
-                $.get('/Admin/Categories/Delete/' + id, function (data) {
-                    $('#deleteCategoryModal .modal-content').html(data);
-                    $('#deleteCategoryModal').modal('show');
-                });
-            });
-
-            $(document).on('click', '#createCategoryBtn', function () {
-                var form = $('#createCategoryForm');
-                var formData = form.serialize();
-                var name = $('#Name').val().trim();
-
-                if (name === '') {
-                    $('#NameError').show();
-                    return;
-                } else {
-                    $('#NameError').hide();
-                }
-
-                $.ajax({
-                    url: '@Url.Action("Create", "Categories")',
-                    type: 'POST',
-                    data: formData,
-                    success: function (response) {
-                        if (response.success) {
-                            $('#createCategoryModal').modal('hide');
-                            toastr.success('Category created successfully!');
-                            loadCategories(); 
-                        } else {
-                            toastr.error('Failed to create category. ' + response.errorMessage);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        toastr.error('An error occurred while creating the category.');
-                    }
-                });
-            });
-           
-            $(document).on('click', '#deleteConfirmBtn', function () {
-                var form = $('#deleteCategoryForm');
-                var formData = form.serialize();
-                $.ajax({
-                    url: '@Url.Action("DeleteConfirmed", "Categories")',
-                    type: 'POST',
-                    data: formData,
-                    success: function (response) {
-                        if (response.success) {
-                            $('#deleteCategoryModal').modal('hide');
-                            toastr.success('Category deleted successfully!');
-                            loadCategories(); 
-                        } else {
-                            toastr.error('Failed to delete category. ' + response.errorMessage);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        toastr.error('An error occurred while deleting the category.');
-                    }
-                });
-            });      
         
-            $(document).on('click', '#editCategoryBtn', function () {
-                var form = $('#editCategoryForm');
-                var formData = form.serialize();
-                var name = $('#Name').val().trim();
-
-                if (name === '') {
-                    $('#NameError').show();
-                    return;
-                } else {
-                    $('#NameError').hide();
-                }
-
-                $.ajax({
-                    url: '@Url.Action("Edit", "Categories")',
-                    type: 'POST',
-                    data: formData,
-                    success: function (response) {
-                        if (response.success) {
-                            $('#editCategoryModal').modal('hide'); 
-                            toastr.success('Category updated successfully!');
-                            loadCategories(); 
-                        } else {
-                            toastr.error('Failed to update category. ' + response.message); 
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        toastr.error('An error occurred while updating the category.');
-                    }
-                });
-            });
-
-            function loadCategories(searchText, page) {
-                searchText = searchText || '';
-                page = page || 1;
-                $('.loading-overlay').removeClass('d-none');
-                $('.table-container').addClass('d-none');
-
-                $.ajax({
-                    url: '@Url.Action("ListCategories", "Categories")',
-                    type: 'GET',
-                    data: { searchText: searchText, page: page  },
-                    success: function (result) {
-                        $('.product-list').html(result);
-                    },
-                    error: function (xhr, status, error) {
-                        console.log("Error: " + error);
-                    },
-                    complete: function () {
-                        $('.loading-overlay').addClass('d-none');
-                        $('.table-container').removeClass('d-none'); 
-                    }
-                });
-            };
-        });
     </script>
 }

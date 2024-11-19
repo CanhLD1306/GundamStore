@@ -3,6 +3,7 @@ using GundamStore.Common;
 using GundamStore.Data;
 using GundamStore.Models;
 using GundamStore.Services;
+using GundamStore.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ using X.PagedList;
 
 namespace GundamStore.Areas.Admin.Controllers
 {
-    //[Area("Admin")]
+    [Area("Admin")]
     //[Authorize(Roles = "Admin")]
     public class CategoriesController : Controller
     {
@@ -36,12 +37,6 @@ namespace GundamStore.Areas.Admin.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(Category category)
         {
-            var adminSession = GetAdminSession();
-            if (adminSession == null || adminSession.UserId == null)
-            {
-                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
-                return RedirectToAction("Index");
-            }
 
             if (string.IsNullOrEmpty(category.Name))
             {
@@ -53,8 +48,6 @@ namespace GundamStore.Areas.Admin.Controllers
             {
                 category.CreatedAt = DateTime.Now;
                 category.UpdatedAt = DateTime.Now;
-                category.CreatedBy = adminSession.UserId;
-                category.UpdatedBy = adminSession.UserId;
                 category.IsDeleted = false;
 
                 if (!await _categoryService.CheckCategoryAsync(category.Name))
@@ -95,17 +88,10 @@ namespace GundamStore.Areas.Admin.Controllers
         [HttpPost]
         public async Task<ActionResult> Edit(Category category)
         {
-            var adminSession = GetAdminSession();
-            if (adminSession == null || adminSession.UserId == null)
-            {
-                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
-                return RedirectToAction("Index");
-            }
 
             if (ModelState.IsValid)
             {
                 category.UpdatedAt = DateTime.Now;
-                category.UpdatedBy = adminSession.UserId;
                 var result = await _categoryService.UpdateCategoryAsync(category);
                 if (result)
                 {
@@ -126,12 +112,6 @@ namespace GundamStore.Areas.Admin.Controllers
         [HttpPost]
         public async Task<ActionResult> Delete(long id, string searchString, int page = 1)
         {
-            var adminSession = GetAdminSession();
-            if (adminSession == null || adminSession.UserId == null)
-            {
-                TempData["SessionError"] = "Session is not valid or has expired. Please log in again.";
-                return RedirectToAction("Index");
-            }
 
             var category = await _categoryService.GetCategoryByIdAsync(id);
 
@@ -142,7 +122,6 @@ namespace GundamStore.Areas.Admin.Controllers
             }
 
             category.UpdatedAt = DateTime.Now;
-            category.UpdatedBy = adminSession.UserId;
             category.IsDeleted = true;
 
             var result = await _categoryService.UpdateCategoryAsync(category);
@@ -159,9 +138,5 @@ namespace GundamStore.Areas.Admin.Controllers
             return RedirectToAction("Index", new { searchString, page });
         }
 
-        private AdminLogin? GetAdminSession()
-        {
-            return HttpContext.Session.GetObjectFromJson<AdminLogin>(Constant.ADMIN_SESSION);
-        }
     }
 }

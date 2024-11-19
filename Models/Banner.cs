@@ -9,7 +9,7 @@ namespace GundamStore.Models
 
         [Required]
         [Url]
-        public string? FileImage { get; set; }
+        public string? ImageURL { get; set; }
 
         [MaxLength(500)]
         public string? Description { get; set; }

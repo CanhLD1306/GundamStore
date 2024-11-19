@@ -6,13 +6,13 @@ namespace GundamStore.Models
     public class OrderItem
     {
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [Required]
-        public int OrderId { get; set; }
+        public long OrderId { get; set; }
 
         [Required]
-        public int ProductId { get; set; }
+        public long ProductId { get; set; }
 
         [Required]
         public int Quantity { get; set; }
@@ -22,16 +22,16 @@ namespace GundamStore.Models
         public decimal TotalPrice { get; set; }
 
         [Required]
-        public DateTime Created_At { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         [Required]
-        public DateTime Updated_At { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         [Required]
-        public string Created_By { get; set; } = string.Empty;
+        public string? CreatedBy { get; set; }
 
         [Required]
-        public string Updated_By { get; set; } = string.Empty;
+        public string? UpdatedBy { get; set; }
 
         [Required]
         public bool IsDeleted { get; set; }

@@ -5,28 +5,28 @@ namespace GundamStore.Models
     public class ProductImage
     {
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [Required]
-        public int ProductId { get; set; }
+        public long ProductId { get; set; }
 
         [Required]
-        [StringLength(1000)]
+        [Url]
         public string? ImageURL { get; set; }
 
         public bool IsDefault { get; set; }
 
         [Required]
-        public DateTime Created_At { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         [Required]
-        public DateTime Updated_At { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         [Required]
-        public string Created_By { get; set; } = string.Empty;
+        public string? CreatedBy { get; set; }
 
         [Required]
-        public string Updated_By { get; set; } = string.Empty;
+        public string? UpdatedBy { get; set; }
 
         [Required]
         public bool IsDeleted { get; set; }

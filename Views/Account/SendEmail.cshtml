@@ -8,36 +8,16 @@
         <img src="~/Template/dist/images/logos/logo.png" width="70" alt="">
     </div>
     <h2 class="text-center mb-4">Enter your email</h2>
-    <form asp-action="SendEmail" method="post">
-        <input type="email" name="email" class="form-control mb-4">
-        <button type="submit" class="btn btn-primary w-100 py-8 rounded-2">Send email</button
+    <form>
+        <input id="Email" name="Email" type="email" class="form-control">
+        <span id="emailError" class="text-danger"></span>
+        <button type="button" class="btn btn-primary w-100 py-8 rounded-2 mt-4" onclick="SendEmail()">Send
+            email</button>
     </form>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
     <script>
-        $(document).ready(function () {
-            var errorMessage = '@TempData["ErrorMessage"]';
-            var successmessage = '@TempData["SuccessMessage"]';
-            if (errorMessage) {
-                toastr.options = {
-                    "positionClass": "toast-top-center", 
-                    "timeOut": 5000,                   
-                    "showMethod": "slideDown",                    
-                };
-                toastr.error(errorMessage);
-                @TempData.Remove("ErrorMessage");
-            }
-            if (successmessage) {
-                toastr.options = {
-                    "positionClass": "toast-top-center", 
-                    "timeOut": 5000,                   
-                    "showMethod": "slideDown",                    
-                };
-                toastr.success(successmessage);
-                @TempData.Remove("SuccessMessage");
-            }
-        });
+        var Url = '@Url.Action("SendVerificationEmail", "Account")';
     </script>
 }

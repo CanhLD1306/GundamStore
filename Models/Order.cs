@@ -6,35 +6,37 @@ namespace GundamStore.Models
     public class Order
     {
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [Required]
         public string? UserId { get; set; }
 
         [Required]
-        public int StatusId { get; set; }
+        public long StatusId { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal TotalAmount { get; set; }
 
         [Required]
-        [MaxLength(255)]
+        [MaxLength(500)]
         public string? ShippingAddress { get; set; }
 
         [Required]
-        public DateTime Created_At { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         [Required]
-        public DateTime Updated_At { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         [Required]
-        public string Created_By { get; set; } = string.Empty;
+        public string? CreatedBy { get; set; }
 
         [Required]
-        public string Updated_By { get; set; } = string.Empty;
+        public string? UpdatedBy { get; set; }
 
         [Required]
         public bool IsDeleted { get; set; }
+
+        public Status? Status { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 using GundamStore.Data;
 using GundamStore.Models;
+using GundamStore.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList;
 
@@ -13,6 +14,7 @@ namespace GundamStore.Services
         {
             _context = context ?? throw new InvalidOperationException("Context is not initialized.");
         }
+
 
         public async Task<List<Scale>> ListAllAsync()
         {

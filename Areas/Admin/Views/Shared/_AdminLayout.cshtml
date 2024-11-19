@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="~/Template/dist/libs/owl.carousel/dist/assets/owl.carousel.min.css">
     <!-- Core Css -->
     <link id="themeColors" rel="stylesheet" href="~/Template/dist/css/style.min.css" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -58,7 +57,8 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" asp-action="Index" asp-controller="Categories" aria-expanded="false">
+                            <a class="sidebar-link" asp-action="Index" asp-controller="Categories"
+                                aria-expanded="false">
                                 <span>
                                     <i class="ti ti-currency-dollar"></i>
                                 </span>
@@ -66,7 +66,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" asp-action="Index" asp-controller="Scales"  aria-expanded="false">
+                            <a class="sidebar-link" asp-action="Index" asp-controller="Scales" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-cpu"></i>
                                 </span>
@@ -74,7 +74,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" asp-action="Index" asp-controller="Banners"  aria-expanded="false">
+                            <a class="sidebar-link" asp-action="Index" asp-controller="Banners" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-activity-heartbeat"></i>
                                 </span>
@@ -109,7 +109,7 @@
                                             <span class="badge bg-primary rounded-4 px-3 py-1 lh-sm">5 new</span>
                                         </div>
                                         <div class="message-body" data-simplebar>
-                                            
+
                                         </div>
                                         <div class="py-6 px-7 mb-1">
                                             <button class="btn btn-outline-primary w-100"> See All Notifications
@@ -122,8 +122,8 @@
                                         data-bs-toggle="dropdown" aria-expanded="false">
                                         <div class="d-flex align-items-center">
                                             <div class="user-profile-img">
-                                                <img src="~/Template/dist/images/profile/user-1.jpg" class="rounded-circle"
-                                                    width="35" height="35" alt="" />
+                                                <img src="~/Template/dist/images/profile/user-1.jpg"
+                                                    class="rounded-circle" width="35" height="35" alt="" />
                                             </div>
                                         </div>
                                     </a>
@@ -134,8 +134,8 @@
                                                 <h5 class="mb-0 fs-5 fw-semibold">User Profile</h5>
                                             </div>
                                             <div class="d-flex align-items-center py-9 mx-7 border-bottom">
-                                                <img src="~/Template/dist/images/profile/user-1.jpg" class="rounded-circle"
-                                                    width="80" height="80" alt="" />
+                                                <img src="~/Template/dist/images/profile/user-1.jpg"
+                                                    class="rounded-circle" width="80" height="80" alt="" />
                                                 <div class="ms-3">
                                                     <h5 class="mb-1 fs-3">Mathew Anderson</h5>
                                                     <span class="mb-1 d-block text-dark">Designer</span>
@@ -146,9 +146,11 @@
                                             </div>
 
                                             <div class="d-grid py-4 px-7 pt-8">
-                                            
-                                                <form action="@Url.Action("Logout", "Account", new {area = ""})" method="post">
-                                                    <button type="submit" class="btn btn-outline-primary">Log Out</button>
+
+                                                <form action="@Url.Action("Logout", "Account", new {area = ""})"
+                                                    method="post">
+                                                    <button type="submit" class="btn btn-outline-primary">Log
+                                                        Out</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -179,9 +181,9 @@
     <script src="~/Template/dist/js/sidebarmenu.js"></script>
     <script src="~/Template/dist/js/custom.js"></script>
     <!-- current page js files -->
+    <script src="~/js/Banner.js"></script>
     <script src="~/Template/dist/libs/apexcharts/dist/apexcharts.min.js"></script>
     <script src="~/Template/dist/js/dashboard2.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     @RenderSection("Scripts", required: false)
 </body>
 

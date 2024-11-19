@@ -1,5 +1,4 @@
-﻿@using GundamStore.ViewModels;
-@model GundamStore.ViewModels.LoginViewModel
+﻿@model GundamStore.ViewModels.LoginViewModel
 
 
 @{
@@ -11,35 +10,36 @@
     <div class="text-nowrap logo-img text-center d-block mb-5 w-100">
         <img src="~/Template/dist/images/logos/logo.png" width="70" alt="">
     </div>
-    <form asp-action="Login" method="post">
+    <form>
         <div class="mb-3">
             <label for="Email" class="form-label">Email</label>
             <input asp-for="Email" type="email" class="form-control">
-            <span asp-validation-for="Email" class="text-danger"></span>
+            <span id="emailError" class="text-danger"></span>
         </div>
         <div class="mb-4">
             <label for="Password" class="form-label">Password</label>
             <input asp-for="Password" type="password" class="form-control">
-            <span asp-validation-for="Password" class="text-danger"></span>
+            <span id="passwordError" class="text-danger"></span>
         </div>
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div class="form-check">
-                <input class="form-check-input primary" type="checkbox" value="" id="flexCheckChecked" checked>
-                <label class="form-check-label text-dark" for="flexCheckChecked">
+                <input class="form-check-input primary" type="checkbox" value="" id="RememberMe" checked>
+                <label class="form-check-label text-dark" for="RememberMe">
                     Remember me
                 </label>
             </div>
             <a class="text-primary fw-medium" href="@Url.Action("SendEmail", "Account")">Forgot Password ?</a>
         </div>
-        
-        <button type="submit" class="btn btn-primary w-100 py-8 rounded-2">Sign In</button>
-        
+
+        <button type="button" class="btn btn-primary w-100 py-8 rounded-2" onclick="login()">Sign In</button>
+
         <div class="position-relative text-center my-2">
             <p class="mb-0 fs-4 px-3 d-inline-block bg-white text-dark z-index-5 position-relative">Or</p>
             <span class="border-top w-100 position-absolute top-50 start-50 translate-middle"></span>
         </div>
         <div class="mb-2 mb-sm-0">
-            <a href="@Url.Action("GoogleLogin", "Account")" class="btn btn-white text-dark border fw-normal d-flex align-items-center justify-content-center rounded-2 py-8">
+            <a href="@Url.Action("GoogleLogin", "Account")"
+                class="btn btn-white text-dark border fw-normal d-flex align-items-center justify-content-center rounded-2 py-8">
                 <img src="~/Template/dist/images/svgs/google-icon.svg" alt="" class="img-fluid me-2" width="18"
                     height="18">
                 <span class="d-none d-sm-block me-1 flex-shrink-0">Sign in with</span>Google
@@ -53,30 +53,7 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-
     <script>
-        $(document).ready(function () {
-            var errorMessage = '@TempData["ErrorMessage"]';
-            var successmessage = '@TempData["SuccessMessage"]';
-            if (errorMessage) {
-                toastr.options = {
-                    "positionClass": "toast-top-center", 
-                    "timeOut": 5000,                   
-                    "showMethod": "slideDown",                    
-                };
-                toastr.error(errorMessage);
-                @TempData.Remove("ErrorMessage");
-            }
-            if (successmessage) {
-                toastr.options = {
-                    "positionClass": "toast-top-center", 
-                    "timeOut": 5000,                   
-                    "showMethod": "slideDown",                    
-                };
-                toastr.success(successmessage);
-                @TempData.Remove("SuccessMessage");
-            }
-        });
+        var Url = '@Url.Action("Login", "Account")';
     </script>
 }

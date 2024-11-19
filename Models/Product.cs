@@ -9,20 +9,20 @@ namespace GundamStore.Models
     {
 
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [MaxLength(255)]
         public string? Name { get; set; }
 
         [Required]
-        public int CategoryId { get; set; }
+        public long CategoryId { get; set; }
 
         [Required]
-        public int ScaleId { get; set; }
+        public long ScaleId { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [MaxLength(255)]
         public string? Brand { get; set; }
 
         [Required]
@@ -34,25 +34,25 @@ namespace GundamStore.Models
         [Required]
         public int StockQuantity { get; set; }
 
-        public int  Sold { get; set; }
+        public int Sold { get; set; }
 
-        [StringLength(1000)]
+        [MaxLength(1000)]
         public string? Description { get; set; }
 
         [Required]
         public bool IsActive { get; set; }
 
         [Required]
-        public DateTime Created_At { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         [Required]
-        public DateTime Updated_At { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         [Required]
-        public string Created_By { get; set; } = string.Empty;
+        public string? CreatedBy { get; set; }
 
         [Required]
-        public string Updated_By { get; set; } = string.Empty;
+        public string? UpdatedBy { get; set; }
 
         [Required]
         public bool IsDeleted { get; set; }
