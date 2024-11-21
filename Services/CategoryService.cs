@@ -10,12 +10,16 @@ namespace GundamStore.Services
     public class CategoryService : ICategoryService
     {
         private readonly ApplicationDbContext _context;
-        public CategoryService(ApplicationDbContext context)
+
+        private readonly IUserService _userService;
+
+        public CategoryService(ApplicationDbContext context, IUserService userService)
         {
             _context = context ?? throw new InvalidOperationException("Context is not initialized.");
+            _userService = userService ?? throw new InvalidOperationException("UserService is not initialized.");
         }
 
-        public async Task<List<Category>> ListAllAsync()
+        public async Task<List<Category>> ListAllCategoriesAsync()
         {
             return await _context.Categories!
                             .Where(c => !c.IsDeleted)
@@ -23,16 +27,7 @@ namespace GundamStore.Services
                             .ToListAsync();
         }
 
-        public async Task<List<Category>> ListAllCategoryAsync(int top)
-        {
-            return await _context.Categories!
-                            .Where(c => !c.IsDeleted)
-                            .OrderByDescending(c => c.CreatedAt)
-                            .Take(top)
-                            .ToListAsync();
-        }
-
-        public async Task<IPagedList<Category>> ListAllAsync(string searchString, int page, int pageSize)
+        public async Task<IPagedList<Category>> ListAllCategoriesAsync(string searchString, int page, int pageSize)
         {
 
             IQueryable<Category> category = _context.Categories!.Where(c => !c.IsDeleted);
@@ -50,72 +45,87 @@ namespace GundamStore.Services
             return new PagedList<Category>(result, page, pageSize);
         }
 
-        public async Task<bool> CheckCategoryAsync(string categoryName)
-        {
-
-            return await _context.Categories!.AnyAsync(c => !c.IsDeleted
-                                                        && c.Name != null
-                                                        && c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public async Task<long> CreateCategoryAsync(Category category)
-        {
-
-            if (category == null)
-            {
-                throw new ArgumentNullException(nameof(category), "Category cannot be null.");
-            }
-
-            await _context.Categories!.AddAsync(category);
-            await _context.SaveChangesAsync();
-            return category.Id;
-        }
         public async Task<Category> GetCategoryByIdAsync(long id)
         {
-
             var category = await _context.Categories!.Where(c => !c.IsDeleted && c.Id == id)
                                                     .FirstOrDefaultAsync();
 
             if (category == null)
             {
-                throw new KeyNotFoundException($"Category with ID {id} not found.");
+                throw new KeyNotFoundException("Category not found.");
             }
 
             return category;
         }
 
-        public async Task<bool> UpdateCategoryAsync(Category category)
+        public async Task<long> InsertCategoryAsync(string name, string description)
         {
-
-            var existingCategory = await _context.Categories!.Where(c => !c.IsDeleted && c.Id == category.Id)
-                                                                .FirstOrDefaultAsync();
-
-            if (existingCategory == null)
+            if (name == null)
             {
-                throw new KeyNotFoundException($"Banner with ID {category.Id} not found.");
+                throw new ArgumentException("Name is required.");
             }
 
-            existingCategory.Name = category.Name;
-            existingCategory.Description = category.Description;
-            existingCategory.UpdatedAt = category.UpdatedAt;
-            existingCategory.UpdatedBy = category.UpdatedBy;
-            existingCategory.IsDeleted = category.IsDeleted;
+            try
+            {
+                var category = new Category
+                {
+                    Name = name,
+                    Description = description,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    CreatedBy = await _userService.GetUserId(),
+                    UpdatedBy = await _userService.GetUserId(),
+                    IsDeleted = false
+                };
 
-            await _context.SaveChangesAsync();
-            return true;
+                await _context.Categories!.AddAsync(category);
+                await _context.SaveChangesAsync();
+                return category.Id;
+            }
+            catch (Exception)
+            {
+                throw new InvalidOperationException("An error occurred while creating the category.");
+            }
         }
-
-        public async Task<Category> ViewDetailAsync(long id)
+        public async Task<bool> UpdateCategoryAsync(long id, string name, string description)
         {
-            var category = await _context.Categories!.Where(c => !c.IsDeleted && c.Id == id)
-                                                    .FirstOrDefaultAsync();
-
-            if (category == null)
+            if (name == null)
             {
-                throw new KeyNotFoundException($"Category with ID {id} not found.");
+                throw new ArgumentException("Name is required.");
             }
 
-            return category;
+            var category = await GetCategoryByIdAsync(id);
+
+            try
+            {
+                category.Name = name;
+                category.Description = description;
+                category.UpdatedAt = DateTime.Now;
+                category.UpdatedBy = await _userService.GetUserId();
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw new InvalidOperationException("An error occurred while editing the category.");
+            }
+        }
+        public async Task<bool> DeleteCategoryAsync(long id)
+        {
+            var category = await GetCategoryByIdAsync(id);
+
+            try
+            {
+                category.UpdatedAt = DateTime.Now;
+                category.UpdatedBy = await _userService.GetUserId();
+                category.IsDeleted = true;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw new InvalidOperationException("An error occurred while deleting the category.");
+            }
         }
 
     }

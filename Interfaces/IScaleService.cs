@@ -5,14 +5,12 @@ namespace GundamStore.Interfaces
 {
     public interface IScaleService
     {
-        Task<List<Scale>> ListAllAsync();
-        Task<List<Scale>> ListAllScaleAsync(int top);
-        Task<IPagedList<Scale>> ListAllAsync(string searchString, int page, int pageSize);
-        Task<bool> CheckScaleAsync(string scaleName);
-        Task<long> InsertAsync(Scale scale);
+        Task<List<Scale>> ListAllScalesAsync();
+        Task<IPagedList<Scale>> ListAllScalesAsync(string searchString, int page, int pageSize);
+        Task<long> InsertScaleAsync(string name, string description);
         Task<Scale> GetScaleByIdAsync(long id);
-        Task<Scale> ViewDetailAsync(long id);
-        Task<bool> UpdateAsync(Scale scale);
+        Task<bool> UpdateScaleAsync(long id, string name, string description);
+        Task<bool> DeleteScaleAsync(long id);
     }
 }
 

@@ -1,18 +1,18 @@
-@model GundamStore.Models.Banner
+@model GundamStore.Models.Category
 
-<div class="modal fade" id="deleteBannerModal" tabindex="-1" role="dialog" aria-labelledby="deleteBannerModalLabel"
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" role="dialog" aria-labelledby="deleteCategoryModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form>
                 <div class="modal-body">
-                    <p class="fs-5 fw-semibold text-center mt-2">Are you sure want to delete this banner ?</p>
+                    <p class="fs-5 fw-semibold text-center mt-2">Are you sure want to delete this category ?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
-                        onclick="CloseModal('deleteBannerModal')">Cancel</button>
+                        onclick="CloseModal('deleteCategoryModal')">Cancel</button>
                     <button type="button" class="btn btn-danger"
-                        onclick="DeleteBannerConfirm(@Model.Id)">Confirm</button>
+                        onclick="DeleteCategoryConfirm(@Model.Id)">Confirm</button>
                 </div>
             </form>
         </div>

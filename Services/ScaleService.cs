@@ -10,34 +10,26 @@ namespace GundamStore.Services
     public class ScaleService : IScaleService
     {
         private readonly ApplicationDbContext _context;
-        public ScaleService(ApplicationDbContext context)
+
+        private readonly IUserService _userService;
+        public ScaleService(ApplicationDbContext context, IUserService userService)
         {
             _context = context ?? throw new InvalidOperationException("Context is not initialized.");
+            _userService = userService ?? throw new InvalidOperationException("UserService is not initialized.");
         }
 
 
-        public async Task<List<Scale>> ListAllAsync()
+        public async Task<List<Scale>> ListAllScalesAsync()
         {
-            CheckScalesInitialized();
-            return await (_context.Scales!
+            return await _context.Scales!
                             .Where(c => !c.IsDeleted)
                             .OrderByDescending(c => c.CreatedAt)
-                            .ToListAsync() ?? Task.FromResult(new List<Scale>()));
+                            .ToListAsync();
         }
 
-        public async Task<List<Scale>> ListAllScaleAsync(int top)
+        public async Task<IPagedList<Scale>> ListAllScalesAsync(string searchString, int page, int pageSize)
         {
-            CheckScalesInitialized();
-            return await (_context.Scales!
-                            .Where(c => !c.IsDeleted)
-                            .OrderByDescending(c => c.CreatedAt)
-                            .Take(top)
-                            .ToListAsync() ?? Task.FromResult(new List<Scale>()));
-        }
 
-        public async Task<IPagedList<Scale>> ListAllAsync(string searchString, int page, int pageSize)
-        {
-            CheckScalesInitialized();
 
             IQueryable<Scale> scale = _context.Scales!.Where(c => !c.IsDeleted);
 
@@ -54,90 +46,89 @@ namespace GundamStore.Services
             return new PagedList<Scale>(result, page, pageSize);
         }
 
-        public async Task<bool> CheckScaleAsync(string scaleName)
+        public async Task<Scale> GetScaleByIdAsync(long id)
         {
-            CheckScalesInitialized();
 
-            return await _context.Scales!.AnyAsync(c => !c.IsDeleted
-                                                        && c.Name != null
-                                                        && c.Name.Equals(scaleName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public async Task<long> InsertAsync(Scale scale)
-        {
-            CheckScalesInitialized();
+            var scale = await _context.Scales!.Where(s => !s.IsDeleted && s.Id == id)
+                                                    .FirstOrDefaultAsync();
 
             if (scale == null)
             {
-                throw new ArgumentNullException(nameof(scale), "Scale cannot be null.");
-            }
-
-            await _context.Scales!.AddAsync(scale);
-            await _context.SaveChangesAsync();
-            return scale.Id;
-        }
-
-        public async Task<Scale> GetScaleByIdAsync(long id)
-        {
-            CheckScalesInitialized();
-
-            var scale = await _context.Scales!.FindAsync(id);
-
-            if (scale == null || scale.IsDeleted)
-            {
-                throw new KeyNotFoundException($"Scale with ID {id} not found.");
+                throw new KeyNotFoundException("Scale not found.");
             }
 
             return scale;
         }
 
-        public async Task<Scale> ViewDetailAsync(long id)
+        public async Task<long> InsertScaleAsync(string name, string description)
         {
-            CheckScalesInitialized();
-
-            var scale = await _context.Scales!.FindAsync(id);
-
-            if (scale == null || scale.IsDeleted)
+            if (name == null)
             {
-                throw new KeyNotFoundException($"Scale with ID {id} not found.");
+                throw new ArgumentException("Name is required.");
             }
 
-            return scale;
-        }
-
-        public async Task<bool> UpdateAsync(Scale scale)
-        {
             try
             {
-                CheckScalesInitialized();
-
-                var existingScale = await _context.Scales!.FindAsync(scale.Id);
-
-                if (existingScale == null || existingScale.IsDeleted)
+                var scale = new Scale
                 {
-                    return false;
-                }
+                    Name = name,
+                    Description = description,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    CreatedBy = await _userService.GetUserId(),
+                    UpdatedBy = await _userService.GetUserId(),
+                    IsDeleted = false
+                };
 
-                existingScale.Name = scale.Name;
-                existingScale.Description = scale.Description;
-                existingScale.UpdatedAt = scale.UpdatedAt;
-                existingScale.UpdatedBy = scale.UpdatedBy;
-                existingScale.IsDeleted = scale.IsDeleted;
+                await _context.Scales!.AddAsync(scale);
+                await _context.SaveChangesAsync();
+                return scale.Id;
+            }
+            catch (Exception)
+            {
+                throw new InvalidOperationException("An error occurred while creating the scale.");
+            }
+        }
 
+        public async Task<bool> UpdateScaleAsync(long id, string name, string description)
+        {
+            if (name == null)
+            {
+                throw new ArgumentException("Name is required.");
+            }
+
+            var scale = await GetScaleByIdAsync(id);
+
+            try
+            {
+                scale.Name = name;
+                scale.Description = description;
+                scale.UpdatedAt = DateTime.Now;
+                scale.UpdatedBy = await _userService.GetUserId();
                 await _context.SaveChangesAsync();
                 return true;
             }
-            catch
+            catch (Exception)
             {
-                return false;
+                throw new InvalidOperationException("An error occurred while editing the scale.");
             }
         }
 
-        private void CheckScalesInitialized()
+        public async Task<bool> DeleteScaleAsync(long id)
         {
-            if (_context?.Scales == null)
+            var scale = await GetScaleByIdAsync(id);
+
+            try
             {
-                throw new InvalidOperationException("Scales DbSet is not initialized.");
+                scale.UpdatedAt = DateTime.Now;
+                scale.UpdatedBy = await _userService.GetUserId();
+                scale.IsDeleted = true;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw new InvalidOperationException("An error occurred while deleting the scale.");
             }
         }
     }

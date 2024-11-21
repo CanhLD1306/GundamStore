@@ -7,17 +7,6 @@
         <div class="row align-items-center">
             <div class="col-9">
                 <h4 class="fw-semibold mb-8">Category</h4>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a class="text-muted "
-                                href="@Url.Action("Index", "Dashboard", new { area = "Admin" })">Dashboard</a>
-                        </li>
-                        <li class="breadcrumb-item" aria-current="page">
-                            Category
-                        </li>
-                    </ol>
-                </nav>
             </div>
             <div class="col-3">
                 <div class="text-center mb-n5">
@@ -36,34 +25,42 @@
             <i class="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
         </form>
     </div>
-    <button class="btn btn-primary btn-add">Add category</button>
+    <button type="button" class="btn btn-primary btn-add" onclick="ShowAddCategoryModal()">Add category</button>
 </div>
 
-<div class="product-list"></div>
-<div class="table-container mb-3">
-    <div class="table-responsive border rounded">
-        <table class="table align-middle text-nowrap mb-0">
-            <thead class="text-dark fs-3">
-                <tr>
-                    <th scope="col">
-                        <h6 class="fs-3 fw-semibold mb-0">Category</h6>
-                    </th>
-                    <th scope="col">
-                        <h6 class="fs-3 fw-semibold mb-0">Description</h6>
-                    </th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                
-            </tbody>
-        </table>
+<div id="category-list-container">
+
+</div>
+
+<div id="modal-Container">
+
+</div>
+
+<div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addCategoryModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
+            </div>
+            <form>
+                <div class="modal-body">
+                    <div class="form-group mb-4">
+                        <label class="mb-2 fw-semibold" for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required />
+                        <span id="nameError" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="mb-2 fw-semibold" for="description">Description</label>
+                        <textarea class="form-control" rows="4" id="description" name="description"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="CloseModal('addCategoryModal')">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="CreateCategory()">Add</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
-
-@section Scripts {
-
-    <script>
-        
-    </script>
-}

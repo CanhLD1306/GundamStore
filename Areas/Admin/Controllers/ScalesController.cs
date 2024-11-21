@@ -12,8 +12,7 @@ using GundamStore.Common;
 
 namespace GundamStore.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    //[Authorize(Roles = "Admin")]
+
     public class ScalesController : BaseController
     {
         private readonly IScaleService _scaleService;
@@ -22,124 +21,131 @@ namespace GundamStore.Areas.Admin.Controllers
         {
             _scaleService = scaleService ?? throw new ArgumentNullException(nameof(scaleService));
         }
-        public async Task<ActionResult> Index(string searhString, int page = 1, int pagesize = 5)
-        {
-            var scales = await _scaleService.ListAllAsync(searhString, page, pagesize);
-            ViewBag.CurrentPage = page;
-            ViewBag.SearchString = searhString;
-            return View(scales);
-        }
-        [HttpGet]
-        public ActionResult Create()
+
+        public IActionResult Index()
         {
             return View();
         }
-        [HttpPost]
-        public async Task<ActionResult> Create(Scale scale)
-        {
 
-
-            if (string.IsNullOrEmpty(scale.Name))
-            {
-                ModelState.AddModelError("scale", "Scale name is required!");
-                return View("Create");
-            }
-
-            if (ModelState.IsValid)
-            {
-                scale.CreatedAt = DateTime.Now;
-                scale.UpdatedAt = DateTime.Now;
-                scale.IsDeleted = false;
-
-                if (!await _scaleService.CheckScaleAsync(scale.Name))
-                {
-                    var result = await _scaleService.InsertAsync(scale);
-                    if (result > 0)
-                    {
-                        ModelState.AddModelError("scaleSuccess", "Scale added successfully.");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("scale", "Failed to add scale.");
-                    }
-                }
-                else
-                {
-                    ModelState.AddModelError("scale", "Scale name already exists!");
-                }
-            }
-            else
-            {
-                ModelState.AddModelError("scale", "Invalid data. Please check again.");
-            }
-            return View("Create");
-        }
         [HttpGet]
-        public async Task<ActionResult> Edit(long id)
+        public async Task<IActionResult> ListAllScales()
         {
-            var scale = await _scaleService.ViewDetailAsync(id);
-            if (scale == null)
-            {
-                TempData["ErrorMessage"] = "Scale not found.";
-                return RedirectToAction("Index");
-            }
-            return View(scale);
+            var scales = await _scaleService.ListAllScalesAsync();
+            return PartialView("_ListScales", scales);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Edit(Scale scale)
+        public async Task<IActionResult> Create(string name, string description)
         {
-
-
-            if (ModelState.IsValid)
+            try
             {
-                scale.UpdatedAt = DateTime.Now;
-                var result = await _scaleService.UpdateAsync(scale);
-                if (result)
-                {
-                    ModelState.AddModelError("scaleSuccess", "Scale updated successfully.");
-                }
-                else
-                {
-                    ModelState.AddModelError("scale", "Failed to update scale.");
-                }
+                await _scaleService.InsertScaleAsync(name, description);
+                return Json(new Result { Success = true, Message = "Scale created successfully." });
             }
-            else
+            catch (ArgumentException ex)
             {
-                ModelState.AddModelError("scale", "Invalid data. Cannot update scale.");
+                return Json(new Result { Success = false, Message = ex.Message });
             }
-            return View("Edit");
+            catch (InvalidOperationException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Json(new Result { Success = false, Message = "You must be logged in to perform this action." });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(long id)
+        {
+            try
+            {
+                var scale = await _scaleService.GetScaleByIdAsync(id);
+                return PartialView("_EditScaleModal", scale);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult> Delete(long id, string searchString, int page = 1)
+        public async Task<IActionResult> Edit(long id, string name, string description)
         {
-
-            var scale = await _scaleService.GetScaleByIdAsync(id);
-
-            if (scale == null)
+            try
             {
-                TempData["ErrorMessage"] = "Scale not found.";
-                return RedirectToAction("Index", new { searchString, page });
+                await _scaleService.UpdateScaleAsync(id, name, description);
+                return Json(new Result { Success = true, Message = "Scale updated successfully." });
             }
-
-            scale.UpdatedAt = DateTime.Now;
-
-            scale.IsDeleted = true;
-
-            var result = await _scaleService.UpdateAsync(scale);
-
-            if (result)
+            catch (KeyNotFoundException ex)
             {
-                TempData["SuccessMessage"] = "Scale deleted successfully.";
+                return Json(new Result { Success = false, Message = ex.Message });
             }
-            else
+            catch (InvalidOperationException ex)
             {
-                TempData["ErrorMessage"] = "Failed to delete scale.";
+                return Json(new Result { Success = false, Message = ex.Message });
             }
-
-            return RedirectToAction("Index", new { searchString, page });
+            catch (UnauthorizedAccessException)
+            {
+                return Json(new Result { Success = false, Message = "You must be logged in to perform this action." });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Delete(long id)
+        {
+            try
+            {
+                var scale = await _scaleService.GetScaleByIdAsync(id);
+                return PartialView("_DeleteScaleModal", scale);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirm(long id)
+        {
+            try
+            {
+                await _scaleService.DeleteScaleAsync(id);
+                return Json(new Result { Success = true, Message = "Scale delete successfully" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Json(new Result { Success = false, Message = "You must be logged in to perform this action." });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
+        }
     }
 }

@@ -1,20 +1,11 @@
-using System.Security.Claims;
-using GundamStore.Common;
-using GundamStore.Data;
 using GundamStore.Models;
-using GundamStore.Services;
 using GundamStore.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using X.PagedList;
+
 
 namespace GundamStore.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    //[Authorize(Roles = "Admin")]
-    public class CategoriesController : Controller
+    public class CategoriesController : BaseController
     {
         private readonly ICategoryService _categoryService;
 
@@ -22,121 +13,131 @@ namespace GundamStore.Areas.Admin.Controllers
         {
             _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
         }
-        public async Task<ActionResult> Index(string searhString, int page = 1, int pagesize = 5)
-        {
-            var categories = await _categoryService.ListAllAsync(searhString, page, pagesize);
-            ViewBag.CurrentPage = page;
-            ViewBag.SearchString = searhString;
-            return View(categories);
-        }
-        [HttpGet]
-        public ActionResult Create()
+
+        public IActionResult Index()
         {
             return View();
         }
-        [HttpPost]
-        public async Task<ActionResult> Create(Category category)
-        {
 
-            if (string.IsNullOrEmpty(category.Name))
-            {
-                ModelState.AddModelError("category", "Category name is required!");
-                return View("Create");
-            }
-
-            if (ModelState.IsValid)
-            {
-                category.CreatedAt = DateTime.Now;
-                category.UpdatedAt = DateTime.Now;
-                category.IsDeleted = false;
-
-                if (!await _categoryService.CheckCategoryAsync(category.Name))
-                {
-                    var result = await _categoryService.CreateCategoryAsync(category);
-                    if (result > 0)
-                    {
-                        ModelState.AddModelError("categorySuccess", "Category added successfully.");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("category", "Failed to add category.");
-                    }
-                }
-                else
-                {
-                    ModelState.AddModelError("category", "Category name already exists!");
-                }
-            }
-            else
-            {
-                ModelState.AddModelError("category", "Invalid data. Please check again.");
-            }
-            return View("Create");
-        }
         [HttpGet]
-        public async Task<ActionResult> Edit(long id)
+        public async Task<IActionResult> ListAllCategories()
         {
-            var category = await _categoryService.ViewDetailAsync(id);
-            if (category == null)
-            {
-                TempData["ErrorMessage"] = "Category not found.";
-                return RedirectToAction("Index");
-            }
-            return View(category);
+            var categories = await _categoryService.ListAllCategoriesAsync();
+            return PartialView("_ListCategories", categories);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Edit(Category category)
+        public async Task<IActionResult> Create(string name, string description)
         {
+            try
+            {
+                await _categoryService.InsertCategoryAsync(name, description);
+                return Json(new Result { Success = true, Message = "Category created successfully." });
+            }
+            catch (ArgumentException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Json(new Result { Success = false, Message = "You must be logged in to perform this action." });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
+        }
 
-            if (ModelState.IsValid)
+        [HttpGet]
+        public async Task<IActionResult> Edit(long id)
+        {
+            try
             {
-                category.UpdatedAt = DateTime.Now;
-                var result = await _categoryService.UpdateCategoryAsync(category);
-                if (result)
-                {
-                    ModelState.AddModelError("categorySuccess", "Category updated successfully.");
-                }
-                else
-                {
-                    ModelState.AddModelError("category", "Failed to update category.");
-                }
+                var category = await _categoryService.GetCategoryByIdAsync(id);
+                return PartialView("_EditCategoryModal", category);
             }
-            else
+            catch (KeyNotFoundException ex)
             {
-                ModelState.AddModelError("category", "Invalid data. Cannot update category.");
+                return Json(new Result { Success = false, Message = ex.Message });
             }
-            return View("Edit");
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult> Delete(long id, string searchString, int page = 1)
+        public async Task<IActionResult> Edit(long id, string name, string description)
         {
-
-            var category = await _categoryService.GetCategoryByIdAsync(id);
-
-            if (category == null)
+            try
             {
-                TempData["ErrorMessage"] = "Category not found.";
-                return RedirectToAction("Index", new { searchString, page });
+                await _categoryService.UpdateCategoryAsync(id, name, description);
+                return Json(new Result { Success = true, Message = "Category updated successfully." });
             }
-
-            category.UpdatedAt = DateTime.Now;
-            category.IsDeleted = true;
-
-            var result = await _categoryService.UpdateCategoryAsync(category);
-
-            if (result)
+            catch (KeyNotFoundException ex)
             {
-                TempData["SuccessMessage"] = "Category deleted successfully.";
+                return Json(new Result { Success = false, Message = ex.Message });
             }
-            else
+            catch (InvalidOperationException ex)
             {
-                TempData["ErrorMessage"] = "Failed to delete category.";
+                return Json(new Result { Success = false, Message = ex.Message });
             }
-
-            return RedirectToAction("Index", new { searchString, page });
+            catch (UnauthorizedAccessException)
+            {
+                return Json(new Result { Success = false, Message = "You must be logged in to perform this action." });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Delete(long id)
+        {
+            try
+            {
+                var category = await _categoryService.GetCategoryByIdAsync(id);
+                return PartialView("_DeleteCategoryModal", category);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirm(long id)
+        {
+            try
+            {
+                await _categoryService.DeleteCategoryAsync(id);
+                return Json(new Result { Success = true, Message = "Category delete successfully" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Json(new Result { Success = false, Message = "You must be logged in to perform this action." });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
+        }
     }
 }

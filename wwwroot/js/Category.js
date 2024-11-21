@@ -1,23 +1,23 @@
-var GetAllBannersUrl = 'Banners/ListAllBanners';
-var CreateBannerUrl = 'Banners/Create';
-var UpdateBannerUrl = 'Banners/Edit/';
-var DeleteBannerUrl = 'Banners/Delete/';
-var DeleteBannerConfirmUrl = 'Banners/DeleteConfirm/';
+var GetAllCategoriesUrl = 'Categories/ListAllCategories';
+var CreateCategoryUrl = 'Categories/Create';
+var UpdateCategoryUrl = 'Categories/Edit/';
+var DeleteCategoryUrl = 'Categories/Delete/';
+var DeleteCategoryConfirmUrl = 'Categories/DeleteConfirm/';
 
 
-// Open Create Banner Modal
-function ShowAddBannerModal() {
-  $("#addBannerModal").modal("show");
+// Open Create Category Modal
+function ShowAddCategoryModal() {
+  $("#addCategoryModal").modal("show");
 }
 
-// Open Edit Banner Modal
-function ShowEditBannerModal(id) {
+// Open Edit Category Modal
+function ShowEditCategoryModal(id) {
   $.ajax({
-    url: UpdateBannerUrl + id,
+    url: UpdateCategoryUrl + id,
     type: "GET",
     success: function (data) {
         $("#modal-Container").html(data);
-        $("#editBannerModal").modal("show");
+        $("#editCategoryModal").modal("show");
     },
     error: function (error) {
       toastr.error("An error occurred: " + error);
@@ -25,14 +25,14 @@ function ShowEditBannerModal(id) {
   });
 }
 
-// Open Delete Banner Modal
-function ShowDeleteBannerModal(id) {
+// Open Delete Category Modal
+function ShowDeleteCategoryModal(id) {
   $.ajax({
-    url: DeleteBannerUrl + id,
+    url: DeleteCategoryUrl + id,
     type: "GET",
     success: function (data) {
         $("#modal-Container").html(data);
-        $("#deleteBannerModal").modal("show");
+        $("#deleteCategoryModal").modal("show");
     },
     error: function (error) {
       toastr.error("An error occurred: " + error);
@@ -40,30 +40,30 @@ function ShowDeleteBannerModal(id) {
   });
 }
 
-function CreateBanner() {
+function CreateCategory() {
   var formData = new FormData();
-  var fileImage = $("#fileImage")[0].files[0];
+  var name = $("#name").val();
   var description = $("#description").val();
 
-  if (!fileImage) {
-    document.getElementById("fileHelp").textContent = "Please upload file image.";
+  if (!name) {
+    document.getElementById("nameError").textContent = "This field is required.";
     return false;
   }
  
-  formData.append("fileImage", fileImage);
+  formData.append("name", name);
   formData.append("description", description);
 
   $.ajax({
-    url: CreateBannerUrl,
+    url: CreateCategoryUrl,
     type: "POST",
     data: formData,
     contentType: false,
     processData: false,
     success: function (response) {
       if (response.success) {
-        CloseModal('addBannerModal');
-        GetAllBanners();
-        toastr.success("Banner created successfully.");
+        CloseModal('addCategoryModal');
+        GetAllCategories();
+        toastr.success("Category created successfully.");
       } else {
         toastr.error(response.message);
       }
@@ -74,23 +74,30 @@ function CreateBanner() {
   });
 }
 
-function UpdateBanner(id) {
+function UpdateCategory(id) {
   var formData = new FormData();
+  var name = $("#name").val();
   var description = $("#description").val();
 
+  if (!name) {
+    document.getElementById("nameError").textContent = "This field is required.";
+    return false;
+  }
+ 
+  formData.append("name", name);
   formData.append("description", description);
 
   $.ajax({
-    url: UpdateBannerUrl + id,
+    url: UpdateCategoryUrl + id,
     type: "POST",
     data: formData,
     contentType: false,
     processData: false,
     success: function (response) {
       if (response.success) {
-        CloseModal('editBannerModal');
-        GetAllBanners();
-        toastr.success("Banner updated successfully.");
+        CloseModal('editCategoryModal');
+        GetAllCategories();
+        toastr.success("Category updated successfully.");
       } else {
         toastr.error(response.message);
       }
@@ -101,16 +108,16 @@ function UpdateBanner(id) {
   });
 }  
 
-function DeleteBannerConfirm(id)
+function DeleteCategoryConfirm(id)
 {
   $.ajax({
-    url: DeleteBannerConfirmUrl + id,
+    url: DeleteCategoryConfirmUrl + id,
     type: "POST",
     success: function (response) {
       if (response.success) {
-        CloseModal('deleteBannerModal');
-        GetAllBanners();
-        toastr.success("Banner delete successfully.");
+        CloseModal('deleteCategoryModal');
+        GetAllCategories();
+        toastr.success("Category delete successfully.");
       } else {
         toastr.error(response.message);
       }
@@ -146,24 +153,28 @@ function previewImage() {
   }
 }
 
-function GetAllBanners(){
+function GetAllCategories(){
   $.ajax({
-    url: GetAllBannersUrl,
+    url: GetAllCategoriesUrl,
     success: function(data) {
-        $('#banner-list-container').html(data);
+        $('#category-list-container').html(data);
     },
     error: function(error) {
-        console.log("Error loading banners:", error);
+        console.log("Error loading categories:", error);
     }
   });
 }
 
+document.getElementById("name")?.addEventListener("input", function () {
+  document.getElementById("nameError").textContent = "";
+})
+
 $(document).ready(function () {
-  $("#addBannerModal").on("hidden.bs.modal", function () {
+  $("#addCategoryModal").on("hidden.bs.modal", function () {
     $(this).find("form")[0].reset();
     $("#preview").attr("src", "").hide();
     document.getElementById("fileHelp").textContent = "";
   });
 
-  GetAllBanners();
+  GetAllCategories();
 });

@@ -7,17 +7,6 @@
         <div class="row align-items-center">
             <div class="col-9">
                 <h4 class="fw-semibold mb-8">Scale</h4>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a class="text-muted "
-                                href="@Url.Action("Index", "Dashboard", new { area = "Admin" })">Dashboard</a>
-                        </li>
-                        <li class="breadcrumb-item" aria-current="page">
-                            Scale
-                        </li>
-                    </ol>
-                </nav>
             </div>
             <div class="col-3">
                 <div class="text-center mb-n5">
@@ -28,26 +17,49 @@
     </div>
 </div>
 
-<div class="product-list">
-    <div class="d-flex justify-content-between align-items-center mb-9">
+<div class="action-btn layout-top-spacing mb-7 d-flex align-items-center justify-content-between">
+    <div class="mb-0 fs-5">
         <form class="position-relative">
-            <input type="text" class="form-control search-chat py-2 ps-5" id="text-srh"
-                placeholder="Search scale">
+            <input type="text" class="form-control search-chat py-2 ps-5" id="searchInput"
+                placeholder="Search category">
             <i class="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
         </form>
     </div>
-    <div class="table-responsive border rounded">
-        <table class="table align-middle text-nowrap mb-0">
-            <thead>
-                <tr>
-                    <th scope="col"><h6 class="fs-3 fw-semibold mb-0">Scales</h6></th>
-                    <th scope="col"><h6 class="fs-3 fw-semibold mb-0">Description</h6></th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                
-            </tbody>
-        </table>
+    <button type="button" class="btn btn-primary" onclick="ShowAddScaleModal()">Add Scale</button>
+</div>
+
+<div id="scale-list-container">
+
+</div>
+
+<div id="modal-Container">
+
+</div>
+
+<div class="modal fade" id="addScaleModal" tabindex="-1" role="dialog" aria-labelledby="addScaleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addScaleModalLabel">Add Scale</h5>
+            </div>
+            <form>
+                <div class="modal-body">
+                    <div class="form-group mb-4">
+                        <label class="mb-2 fw-semibold" for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required />
+                        <span id="nameError" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="mb-2 fw-semibold" for="description">Description</label>
+                        <textarea class="form-control" rows="4" id="description" name="description"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="CloseModal('addScaleModal')">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="CreateScale()">Add</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>

@@ -7,16 +7,6 @@
     <div class="row align-items-center">
       <div class="col-9">
         <h4 class="fw-semibold mb-8">Banner</h4>
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-              <a class="text-muted " href="@Url.Action("Index", "Dashboard", new { area = "Admin" })">Dashboard</a>
-            </li>
-            <li class="breadcrumb-item" aria-current="page">
-              Banners
-            </li>
-          </ol>
-        </nav>
       </div>
       <div class="col-3">
         <div class="text-center mb-n5">
@@ -39,6 +29,7 @@
 <div id="modal-Container">
 
 </div>
+
 <div class="modal fade" id="addBannerModal" tabindex="-1" role="dialog" aria-labelledby="addBannerModalLabel"
   aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -63,7 +54,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="CloseModal()">Close</button>
+          <button type="button" class="btn btn-secondary" onclick="CloseModal('addBannerModal')">Close</button>
           <button type="button" class="btn btn-primary" onclick="CreateBanner()">Add</button>
         </div>
       </form>

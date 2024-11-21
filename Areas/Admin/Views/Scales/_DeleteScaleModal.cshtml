@@ -1,18 +1,18 @@
-@model GundamStore.Models.Banner
+@model GundamStore.Models.Scale
 
-<div class="modal fade" id="deleteBannerModal" tabindex="-1" role="dialog" aria-labelledby="deleteBannerModalLabel"
+<div class="modal fade" id="deleteScaleModal" tabindex="-1" role="dialog" aria-labelledby="deleteScaleModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form>
                 <div class="modal-body">
-                    <p class="fs-5 fw-semibold text-center mt-2">Are you sure want to delete this banner ?</p>
+                    <p class="fs-5 fw-semibold text-center mt-2">Are you sure want to delete this scale ?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
-                        onclick="CloseModal('deleteBannerModal')">Cancel</button>
+                        onclick="CloseModal('deleteScaleModal')">Cancel</button>
                     <button type="button" class="btn btn-danger"
-                        onclick="DeleteBannerConfirm(@Model.Id)">Confirm</button>
+                        onclick="DeleteScaleConfirm(@Model.Id)">Confirm</button>
                 </div>
             </form>
         </div>

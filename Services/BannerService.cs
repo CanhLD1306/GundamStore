@@ -1,7 +1,6 @@
 using GundamStore.Data;
 using GundamStore.Interfaces;
 using GundamStore.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GundamStore.Services
@@ -45,7 +44,7 @@ namespace GundamStore.Services
             return banner;
         }
 
-        public async Task<long> CreateBannerAsync(IFormFile fileImage, string description)
+        public async Task<long> InsertBannerAsync(IFormFile fileImage, string description)
         {
             var banners = await ListAllBannersAsync();
 

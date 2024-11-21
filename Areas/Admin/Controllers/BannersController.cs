@@ -34,7 +34,7 @@ namespace GundamStore.Areas.Admin.Controllers
         {
             try
             {
-                await _bannerService.CreateBannerAsync(fileImage, description);
+                await _bannerService.InsertBannerAsync(fileImage, description);
                 return Json(new Result { Success = true, Message = "Banner created successfully." });
             }
             catch (ArgumentException ex)
