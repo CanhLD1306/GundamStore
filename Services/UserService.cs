@@ -208,14 +208,19 @@ namespace GundamStore.Services
             _httpContextAccessor.HttpContext?.Session.Remove("UserSession");
         }
 
-        public async Task HandleGoogleLoginAsync(ExternalLoginInfo info)
+        public async Task<GoogleLoginResult> HandleGoogleLoginAsync(ExternalLoginInfo info)
         {
+            if (info == null)
+            {
+                return GoogleLoginResult.Canceled;
+            }
+
             var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
 
             if (user != null)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return;
+                return GoogleLoginResult.AlreadyRegisteredWithGoogle;
             }
 
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
@@ -227,7 +232,7 @@ namespace GundamStore.Services
                 if (addLoginResult.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    return;
+                    return GoogleLoginResult.AddedGoogleLoginToExistingAccount;
                 }
 
                 throw new InvalidOperationException("Error adding external login.");
@@ -252,13 +257,14 @@ namespace GundamStore.Services
                 throw new InvalidOperationException("Failed to add external login.");
             }
 
-            var roleResult = await _userManager.AddToRoleAsync(user, "Customer");
+            var roleResult = await _userManager.AddToRoleAsync(user, Roles.Customer);
             if (!roleResult.Succeeded)
             {
                 throw new InvalidOperationException("Failed to assign role.");
             }
 
             SetUserSession(email, "", "");
+            return GoogleLoginResult.NewAccountCreated;
         }
 
         public async Task<string> GetUserRoleAsync(string email)
@@ -270,17 +276,23 @@ namespace GundamStore.Services
             }
 
             var roles = await _userManager.GetRolesAsync(user);
-            if (roles.Contains("Admin"))
+            if (roles.Contains(Roles.Admin))
             {
-                return "Admin";
+                return Roles.Admin;
             }
 
-            return "Customer";
+            return Roles.Customer;
         }
 
         public async Task<string> GetUserId()
         {
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                throw new InvalidOperationException("HttpContext is null. This method must be called within an HTTP request.");
+            }
+
             var claimsPrincipal = _httpContextAccessor.HttpContext?.User;
+
             if (claimsPrincipal == null)
             {
                 throw new UnauthorizedAccessException("User not logged in.");

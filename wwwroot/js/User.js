@@ -18,7 +18,10 @@ function login() {
     },
     success: function (response) {
       if (response.success) {
-        window.location.href = response.redirectUrl;
+        toastr.success(response.message);
+        setTimeout(function() {
+            window.location.href = response.redirectUrl;
+        }, 2000);
       } else {
         toastr.error(response.message);
       }
@@ -50,7 +53,9 @@ function register() {
     success: function (response) {
       if (response.success) {
         toastr.info(response.message);
-        window.location.href = response.redirectUrl;
+        setTimeout(function() {
+          window.location.href = response.redirectUrl;
+        }, 2000);
       } else {
         toastr.error(response.message);
       }
@@ -61,7 +66,7 @@ function register() {
   });
 }
 
-function ResetPassword(){
+function resetPassword(){
 
   if(!validateResetPasswordForm()){
     return;
@@ -199,19 +204,11 @@ function validateRegisterForm() {
 
 }
 
-function validResetPasswordForm() {
+function validateResetPasswordForm() {
   var password = document.getElementById("Password").value;
   var confirmPassword = document.getElementById("ConfirmPassword").value;
   var passwordValidation = validatePassword(password);  
   var valid = true;
-
-  if (!email) {
-    document.getElementById("emailError").textContent = "Please enter your email.";
-    valid = false;
-  } else if (!validateEmail(email)) {
-    document.getElementById("emailError").textContent = "Please enter a valid email address.";
-    valid = false;
-  }
 
   if (!password) {
     document.getElementById("passwordError").textContent = "Please enter your password.";
@@ -296,19 +293,19 @@ function validateOTPForm() {
   return valid;
 }
 
-document.getElementById("Email").addEventListener("input", function () {
+document.getElementById("Email")?.addEventListener("input", function () {
   document.getElementById("emailError").textContent = "";
-});
+})
 
-document.getElementById("Password").addEventListener("input", function () {
+document.getElementById("Password")?.addEventListener("input", function () {
   document.getElementById("passwordError").textContent = "";
-});
+})
 
-document.getElementById("ConfirmPassword").addEventListener("input", function () {
+document.getElementById("ConfirmPassword")?.addEventListener("input", function () {
     document.getElementById("confirmPasswordError").textContent = "";
-});
+})
 
-document.getElementById("OTP").addEventListener("input", function () {
+document.getElementById("OTP")?.addEventListener("input", function () {
   document.getElementById("OTPError").textContent = "";
-});
+})
 

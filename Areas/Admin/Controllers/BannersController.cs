@@ -9,8 +9,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GundamStore.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    // [Authorize(Roles = "Admin")]
     public class BannersController : BaseController
     {
         private readonly IBannerService _bannerService;
@@ -19,12 +17,18 @@ namespace GundamStore.Areas.Admin.Controllers
             _bannerService = bannerService ?? throw new ArgumentNullException(nameof(bannerService));
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ListAllBanners()
         {
             var banners = await _bannerService.ListAllBannersAsync();
-            return View(banners);
-
+            return PartialView("_ListBanners", banners);
         }
+
         [HttpPost]
         public async Task<IActionResult> Create(IFormFile fileImage, string description)
         {
@@ -33,68 +37,111 @@ namespace GundamStore.Areas.Admin.Controllers
                 await _bannerService.CreateBannerAsync(fileImage, description);
                 return Json(new Result { Success = true, Message = "Banner created successfully." });
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Json(new Result { Success = false, Message = "You must be logged in to perform this action." });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
             }
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(long id)
         {
-            var banner = await _bannerService.GetBannerByIdAsync(id);
-            if (banner == null)
+            try
             {
-                TempData["ErrorMessage"] = "Banner not found.";
-                return RedirectToAction("Index");
+                var banner = await _bannerService.GetBannerByIdAsync(id);
+                return PartialView("_EditBannerModal", banner);
             }
-            return View(banner);
+            catch (KeyNotFoundException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
         }
 
-        public async Task<IActionResult> Edit(long id, IFormFile fileImage, string description)
+        [HttpPost]
+        public async Task<IActionResult> Edit(long id, string description)
         {
-
-            if (fileImage == null)
+            try
             {
-                ModelState.AddModelError("Banner", "Image is required!");
-                return View("Create", new Banner { Description = description });
+                await _bannerService.UpdateBannerAsync(id, description);
+                return Json(new Result { Success = true, Message = "Banner updated successfully." });
             }
-
-            if (!fileImage.ContentType.StartsWith("image/"))
+            catch (KeyNotFoundException ex)
             {
-                throw new ArgumentException("The file is invalid. Please upload an image file.");
+                return Json(new Result { Success = false, Message = ex.Message });
             }
-
-            var result = await _bannerService.UpdateBannerAsync(id, fileImage, description);
-
-            if (result)
+            catch (InvalidOperationException ex)
             {
-                TempData["bannerSuccess"] = "Banner updated successfully.";
-                return RedirectToAction("Index");
+                return Json(new Result { Success = false, Message = ex.Message });
             }
-            else
+            catch (UnauthorizedAccessException)
             {
-                ModelState.AddModelError("banner", "Failed to update banner.");
+                return Json(new Result { Success = false, Message = "You must be logged in to perform this action." });
             }
-
-            return View("Edit");
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
         }
 
+        [HttpGet]
         public async Task<IActionResult> Delete(long id)
         {
-
-            var result = await _bannerService.DeleteBannerAsync(id);
-
-            if (result)
+            try
             {
-                TempData["bannerSuccess"] = "Banner deleted successfully.";
-                return RedirectToAction("Index");
+                var banner = await _bannerService.GetBannerByIdAsync(id);
+                return PartialView("_DeleteBannerModal", banner);
             }
-            else
+            catch (KeyNotFoundException ex)
             {
-                ModelState.AddModelError("banner", "Failed to delete banner.");
+                return Json(new Result { Success = false, Message = ex.Message });
             }
-            return View("Index");
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirm(long id)
+        {
+            try
+            {
+                await _bannerService.DeleteBannerAsync(id);
+                return Json(new Result { Success = true, Message = "Banner delete successfully" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Json(new Result { Success = false, Message = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Json(new Result { Success = false, Message = "You must be logged in to perform this action." });
+            }
+            catch (Exception)
+            {
+                return Json(new Result { Success = false, Message = "An error occurred. Please try again later." });
+            }
+        }
+
     }
 }

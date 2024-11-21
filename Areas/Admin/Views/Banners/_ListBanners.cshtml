@@ -17,11 +17,13 @@
       @foreach (var banner in Model)
       {
         <tr>
-          <td><img src="@banner.ImageURL" alt="Banner Image" style="max-width: 100px; height: auto;" /></td>
+          <td><img src="@banner.ImageURL" alt="Banner Image"
+              style="max-width: 100%; max-height: 150px; margin : 0 auto" />
+          </td>
           <td>@banner.Description</td>
-          <td>
-            <button id="EditBtn" class="btn btn-warning">Edit</button>
-            <button id="DeleteBtn" class="btn btn-danger">Delete</button>
+          <td class="text-end">
+            <button type="button" class="btn btn-warning" onclick="ShowEditBannerModal(@banner.Id)">Edit</button>
+            <button type="button" class="btn btn-danger" onclick="ShowDeleteBannerModal(@banner.Id)">Delete</button>
           </td>
         </tr>
       }

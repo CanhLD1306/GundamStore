@@ -39,7 +39,7 @@ namespace GundamStore.Services
 
             if (banner == null)
             {
-                throw new KeyNotFoundException($"Banner with ID {id} not found.");
+                throw new KeyNotFoundException("Banner not found.");
             }
 
             return banner;
@@ -56,78 +56,74 @@ namespace GundamStore.Services
 
             if (fileImage == null)
             {
-                throw new ArgumentException("File image is required.", nameof(fileImage));
+                throw new ArgumentException("File image is required.");
             }
 
             if (!fileImage.ContentType.StartsWith("image/"))
             {
-                throw new ArgumentException("The file is invalid. Please upload an image file.");
+                throw new InvalidOperationException("The file is invalid. Please upload an image file.");
             }
 
-            var imageUrl = await _firebaseStorageService.UploadFileAsync(fileImage, BannerFolder);
-
-            var banner = new Banner
+            try
             {
-                ImageURL = imageUrl,
-                Description = description,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-                CreatedBy = await _userService.GetUserId(),
-                UpdatedBy = await _userService.GetUserId(),
-                IsDeleted = false
-            };
+                var imageUrl = await _firebaseStorageService.UploadFileAsync(fileImage, BannerFolder);
 
-            await _context.Banners!.AddAsync(banner);
-            await _context.SaveChangesAsync();
-            return banner.Id;
+                var banner = new Banner
+                {
+                    ImageURL = imageUrl,
+                    Description = description,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    CreatedBy = await _userService.GetUserId(),
+                    UpdatedBy = await _userService.GetUserId(),
+                    IsDeleted = false
+                };
+
+                await _context.Banners!.AddAsync(banner);
+                await _context.SaveChangesAsync();
+                return banner.Id;
+            }
+            catch (Exception)
+            {
+                throw new InvalidOperationException("An error occurred while creating the banner.");
+            }
 
         }
 
-        public async Task<bool> UpdateBannerAsync(long id, IFormFile fileImage, string description)
+        public async Task<bool> UpdateBannerAsync(long id, string description)
         {
-            var banner = await _context.Banners!.Where(b => !b.IsDeleted && b.Id == id)
-                                                    .FirstOrDefaultAsync();
+            var banner = await GetBannerByIdAsync(id);
 
-            if (banner == null)
-            {
-                throw new KeyNotFoundException($"Banner with ID {id} not found.");
-            }
-
-            if (fileImage == null)
+            try
             {
                 banner.Description = description;
+                banner.UpdatedAt = DateTime.Now;
+                banner.UpdatedBy = await _userService.GetUserId();
+                await _context.SaveChangesAsync();
+                return true;
             }
-            else
+            catch (Exception)
             {
-                if (!fileImage.ContentType.StartsWith("image/"))
-                {
-                    throw new ArgumentException("The file is invalid. Please upload an image file.");
-                }
-                var imageUrl = await _firebaseStorageService.UploadFileAsync(fileImage, BannerFolder);
-                banner.ImageURL = imageUrl;
+                throw new InvalidOperationException("An error occurred while editing the banner.");
             }
-            banner.UpdatedAt = DateTime.Now;
-            banner.UpdatedBy = await _userService.GetUserId();
-            await _context.SaveChangesAsync();
-            return true;
         }
 
         public async Task<bool> DeleteBannerAsync(long id)
         {
-            var banner = await _context.Banners!.Where(b => !b.IsDeleted && b.Id == id)
-                                                    .FirstOrDefaultAsync();
+            var banner = await GetBannerByIdAsync(id);
 
-            if (banner == null)
+            try
             {
-                throw new KeyNotFoundException($"Banner with ID {id} not found.");
+                banner.UpdatedAt = DateTime.Now;
+                banner.UpdatedBy = await _userService.GetUserId();
+                banner.IsDeleted = true;
+                await _context.SaveChangesAsync();
+                return true;
             }
-
-
-            banner.UpdatedAt = DateTime.Now;
-            banner.UpdatedBy = await _userService.GetUserId();
-            banner.IsDeleted = true;
-            await _context.SaveChangesAsync();
-            return true;
+            catch (Exception)
+            {
+                throw new InvalidOperationException("An error occurred while deleting the banner.");
+            }
         }
     }
 

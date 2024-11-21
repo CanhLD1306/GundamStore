@@ -1,0 +1,19 @@
+@model GundamStore.Models.Banner
+
+<div class="modal fade" id="deleteBannerModal" tabindex="-1" role="dialog" aria-labelledby="deleteBannerModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form>
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <div class="modal-body">
+                    <p class="fs-5 fw-semibold text-center mt-2">Are you sure want to delete this banner ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="CloseModal()">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="DeleteConfirm(@Model.Id)">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

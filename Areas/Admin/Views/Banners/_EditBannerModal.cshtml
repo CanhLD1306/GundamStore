@@ -1,0 +1,34 @@
+@model GundamStore.Models.Banner
+
+<div class="modal fade" id="editBannerModal" tabindex="-1" role="dialog" aria-labelledby="editBannerModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editBannerModalLabel">Edit Banner</h5>
+                </button>
+            </div>
+            <form enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="form-group mb-4">
+                        <img src="@Model.ImageURL" alt="Banner Image"
+                            style="max-width: 100%; max-height: 250px; display: block; margin : 0 auto" />
+                    </div>
+                    <div class="form-group">
+                        <label class="fw-semibold mb-2" for="editDescription">Description</label>
+                        @Html.TextAreaFor(model => model.Description, new
+                            {
+                                @class = "form-control",
+                                rows = 4,
+                                id = "description"
+                            })
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="CloseModal()">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="UpdateBanner(@Model.Id)">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Net.Mail;
+using GundamStore.Common;
 
 
 namespace GundamStore.Controllers
@@ -57,7 +58,7 @@ namespace GundamStore.Controllers
                 await _userService.AuthenticateUserAsync(model.Email, model.Password!, model.RememberMe);
                 var role = await _userService.GetUserRoleAsync(model.Email);
 
-                if (role == "Admin")
+                if (role == Roles.Admin)
                 {
                     return Json(new Result
                     {
@@ -165,22 +166,21 @@ namespace GundamStore.Controllers
 
             try
             {
-                await _userService.HandleGoogleLoginAsync(info);
-                return Json(new Result
+                var result = await _userService.HandleGoogleLoginAsync(info);
+
+                if (result == GoogleLoginResult.AlreadyRegisteredWithGoogle || result == GoogleLoginResult.AddedGoogleLoginToExistingAccount)
                 {
-                    Success = true,
-                    Message = "Login successfully !",
-                    RedirectUrl = Url.Action("ResetPassword", "Account")
-                });
+                    return RedirectToAction("Index", "Home");
+                }
+                else if (result == GoogleLoginResult.Canceled)
+                {
+                    return RedirectToAction("Login", "Account");
+                }
+                return RedirectToAction("ResetPassword", "Account");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Json(new Result
-                {
-                    Success = false,
-                    Message = ex.Message,
-                    RedirectUrl = Url.Action("Login", "Account")
-                });
+                return RedirectToAction("Login", "Account");
             }
 
         }
@@ -193,11 +193,11 @@ namespace GundamStore.Controllers
             {
                 await _signInManager.SignOutAsync();
 
-                if (await _userManager.IsInRoleAsync(user, "Admin"))
+                if (await _userManager.IsInRoleAsync(user, Roles.Admin))
                 {
                     return RedirectToAction("Login", "Account");
                 }
-                else if (await _userManager.IsInRoleAsync(user, "Customer"))
+                else if (await _userManager.IsInRoleAsync(user, Roles.Customer))
                 {
                     return RedirectToAction("Index", "Home");
                 }

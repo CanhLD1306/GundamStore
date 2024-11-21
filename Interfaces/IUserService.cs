@@ -1,3 +1,4 @@
+using GundamStore.Common;
 using Microsoft.AspNetCore.Identity;
 
 
@@ -13,7 +14,7 @@ namespace GundamStore.Interfaces
         Task<string> GetUserId();
         Task VerifyOTPToRegisterAsync(string OTP);
         Task VerifyOTPToResetPasswordAsync(string OTP);
-        Task HandleGoogleLoginAsync(ExternalLoginInfo info);
+        Task<GoogleLoginResult> HandleGoogleLoginAsync(ExternalLoginInfo info);
     }
 }
 
