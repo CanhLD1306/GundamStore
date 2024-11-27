@@ -1,0 +1,163 @@
+@model GundamStore.Models.Product
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+<div class="card bg-light-info shadow-none position-relative overflow-hidden">
+    <div class="card-body px-4 py-3">
+        <div class="row align-items-center">
+            <div class="col-9">
+                <h4 class="fw-semibold mb-8">
+                    Edit product
+                </h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a class="text-muted " href="@Url.Action("Index", "Products")">Product</a>
+                        </li>
+                        <li class="breadcrumb-item" aria-current="page">
+                            Edit product
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-3">
+                <div class="text-center mb-n5">
+                    <img src="~/Template/dist/images/breadcrumb/ChatBc.png" alt="" class="img-fluid mb-n4" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-body p-4 border-bottom">
+            <form enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-4">
+                            <label for="name" class="form-label fw-semibold">Name</label>
+                            @Html.TextBoxFor(
+                                     model => model.Name,
+                                     new { @class = "form-control", @id = "name" }
+                                     )
+                            <span id="nameError" class="text-danger"></span>
+                        </div>
+                        <div class="mb-4">
+                            <label for="category" class="form-label fw-semibold">Category</label>
+                            @Html.DropDownList(
+                                     "CategoryId",
+                                     new SelectList(ViewBag.Categories, "Id", "Name", Model.CategoryId),
+                                     "-- Select Category --",
+                                     new { @class = "form-select", @required = "required", @id = "category" }
+                                     )
+                            <span id="categoryError" class="text-danger"></span>
+                        </div>
+                        <div class="mb-4">
+                            <label for="scale" class="form-label fw-semibold">Scale</label>
+                            @Html.DropDownList(
+                                     "ScaleId",
+                                     new SelectList(ViewBag.Scales, "Id", "Name", Model.ScaleId),
+                                     "-- Select Scale --",
+                                     new { @class = "form-select", @required = "required", @id = "scale" }
+                                     )
+                            <span id="scaleError" class="text-danger"></span>
+                        </div>
+                        <div class="mb-4">
+                            <label for="brand" class="form-label fw-semibold">Brand</label>
+                            @Html.TextBoxFor(
+                                     model => model.Brand,
+                                     new { @class = "form-control", @id = "brand" }
+                                     )
+                            <span id="brandError" class="text-danger"></span>
+                        </div>
+                        <div class="mb-4">
+                            <label for="price" class="form-label fw-semibold">Price</label>
+                            @Html.TextBoxFor(
+                                     model => model.Price,
+                                     new
+                                     {
+                                         @type = "number",
+                                         @step = "0.01",
+                                         @min = "0.01",
+                                         @class = "form-control",
+                                         @id =
+                                     "price"
+                                     }
+                                     )
+                        </div>
+                        <div class="mb-4">
+                            <label for="quantity" class="form-label fw-semibold">Quantity</label>
+                            @Html.TextBoxFor(
+                                     model => model.StockQuantity,
+                                     new { @type = "number", @min = "1", @class = "form-control", @id = "quantity" }
+                                     )
+                        </div>
+                        <div class="mb-4">
+                            <label for="discount" class="form-label fw-semibold">Discount</label>
+                            @Html.TextBoxFor(
+                                     model => model.Discount,
+                                     new
+                                     {
+                                         @type = "number",
+                                         @min = "0",
+                                         @max = "100",
+                                         @class = "form-control",
+                                         @id = "discount"
+                                     }
+                                     )
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div id="carouselExampleControls" class="carousel slide carousel-dark text-center"
+                            style="display: none">
+                            <div class="carousel-inner" id="carousel-images"
+                                style="padding-left: 80px; padding-right: 80px; box-sizing: border-box;">
+
+                            </div>
+                            <a class="carousel-control-prev" href="#carouselExampleControls" role="button"
+                                data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#carouselExampleControls" role="button"
+                                data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </a>
+                        </div>
+                        <input class="form-control mt-4" type="file" id="formFileMultiple" multiple />
+                        <span id="fileHelp" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="description" class="form-label fw-semibold">Description</label>
+                    <div id="editor" style="height: 300px">
+
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <button type="button" class="btn btn-primary" onclick="UpdateProduct(@Model.Id)">Save
+                        Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        const UpdateProductUrl = '@Url.Action("UpdateProduct", "Products", new { area = "Admin" })';
+        const quill = new Quill("#editor", {
+            theme: "snow",
+        });
+        const initialContent = "@Html.Raw(Model.Description)";
+        quill.clipboard.dangerouslyPasteHTML(initialContent);
+
+        const serverImages = @Html.Raw(Json.Serialize(ViewBag.Images));
+
+        handleServerImages(serverImages);
+    </script>
+}

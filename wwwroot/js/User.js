@@ -3,10 +3,10 @@ function login() {
     return;
   }
 
-  var email = $("#Email").val();
-  var password = $("#Password").val();
-  var rememberMe = $("#RememberMe").prop("checked");
-  var returnUrl = "";
+  const email = $("#Email").val();
+  const password = $("#Password").val();
+  const rememberMe = $("#RememberMe").prop("checked");
+  const returnUrl = "";
   $.ajax({
     url: Url,
     type: "POST",
@@ -37,9 +37,9 @@ function register() {
     return;
   }
 
-  var email = $("#Email").val();
-  var password = $("#Password").val();
-  var confirmPassword = $("#ConfirmPassword").val();
+  const email = $("#Email").val();
+  const password = $("#Password").val();
+  const confirmPassword = $("#ConfirmPassword").val();
 
 
   $.ajax({
@@ -72,8 +72,8 @@ function resetPassword(){
     return;
   }
 
-  var password = $("#Password").val();
-  var confirmPassword = $("#ConfirmPassword").val();
+  const password = $("#Password").val();
+  const confirmPassword = $("#ConfirmPassword").val();
 
   $.ajax({
     url: Url,
@@ -101,7 +101,7 @@ function VerifyOTP(){
     return;
   }
 
-  var otp = $("#OTP").val();
+  const otp = $("#OTP").val();
 
   $.ajax({
     url: Url,
@@ -127,7 +127,7 @@ function SendEmail(){
     return;
   }
 
-  var email = $("#Email").val();
+  const email = $("#Email").val();
 
   $.ajax({
     url: Url,
@@ -146,9 +146,9 @@ function SendEmail(){
 }
 
 function validateLoginForm() {
-  var email = document.getElementById("Email").value.trim();
-  var password = document.getElementById("Password").value;
-  var valid = true;
+  const email = document.getElementById("Email").value.trim();
+  const password = document.getElementById("Password").value;
+  const valid = true;
 
   if (!email) {
     document.getElementById("emailError").textContent =
@@ -170,11 +170,11 @@ function validateLoginForm() {
 }
 
 function validateRegisterForm() {
-  var email = document.getElementById("Email").value.trim();
-  var password = document.getElementById("Password").value;
-  var confirmPassword = document.getElementById("ConfirmPassword").value;
-  var passwordValidation = validatePassword(password);
-  var valid = true;
+  const email = document.getElementById("Email").value.trim();
+  const password = document.getElementById("Password").value;
+  const confirmPassword = document.getElementById("ConfirmPassword").value;
+  const passwordValidation = validatePassword(password);
+  const valid = true;
 
   if (!email) {
     document.getElementById("emailError").textContent = "Please enter your email.";
@@ -205,10 +205,10 @@ function validateRegisterForm() {
 }
 
 function validateResetPasswordForm() {
-  var password = document.getElementById("Password").value;
-  var confirmPassword = document.getElementById("ConfirmPassword").value;
-  var passwordValidation = validatePassword(password);  
-  var valid = true;
+  const password = document.getElementById("Password").value;
+  const confirmPassword = document.getElementById("ConfirmPassword").value;
+  const passwordValidation = validatePassword(password);  
+  const valid = true;
 
   if (!password) {
     document.getElementById("passwordError").textContent = "Please enter your password.";
@@ -230,8 +230,8 @@ function validateResetPasswordForm() {
 }
 
 function validateEmailForm() {
-  var email = document.getElementById("Email").value.trim();
-  var valid = true;
+  const email = document.getElementById("Email").value.trim();
+  const valid = true;
 
   if (!email) {
     document.getElementById("emailError").textContent = "Please enter your email.";
@@ -246,13 +246,13 @@ function validateEmailForm() {
 
 function validatePassword(password) {
 
-  var minLength = 8;
-  var maxLength = 20;
-  var hasUpperCase = /[A-Z]/;
-  var hasLowerCase = /[a-z]/;
-  var hasNumber = /\d/;
-  var hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
-  var messages = [];
+  const minLength = 8;
+  const maxLength = 20;
+  const hasUpperCase = /[A-Z]/;
+  const hasLowerCase = /[a-z]/;
+  const hasNumber = /\d/;
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
+  const messages = [];
 
   if (password.length < minLength || password.length > maxLength) {
     messages.push(`be ${minLength}-${maxLength} characters long`);
@@ -277,13 +277,13 @@ function validatePassword(password) {
 }
 
 function validateEmail(email) {
-  var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 }
 
 function validateOTPForm() {
-  var otp = document.getElementById("OTP").value;
-  var valid = true;
+  const otp = document.getElementById("OTP").value;
+  const valid = true;
 
   if (!otp) { 
     document.getElementById("OTPError").textContent = "Please enter your OTP.";

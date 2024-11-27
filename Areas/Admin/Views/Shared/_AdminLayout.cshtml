@@ -1,3 +1,8 @@
+@using Microsoft.AspNetCore.Identity;
+@using System.Security.Claims;
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,9 +22,10 @@
     <link rel="shortcut icon" type="image/png" href="~/Template/dist/images/logos/logo.png" />
     <!-- Owl Carousel -->
     <link rel="stylesheet" href="~/Template/dist/libs/owl.carousel/dist/assets/owl.carousel.min.css">
+
+    <link rel="stylesheet" href="~/Template/dist/libs/quill/dist/quill.snow.css">
     <!-- Core Css -->
     <link id="themeColors" rel="stylesheet" href="~/Template/dist/css/style.min.css" />
-
     <!-- Toastr CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
 </head>
@@ -46,13 +52,14 @@
                         <li class="sidebar-item">
                             <a class="sidebar-link" asp-action="Index" asp-controller="Dashboard" aria-expanded="false">
                                 <span>
-                                    <i class="ti ti-aperture"></i>
+                                    <i class="ti ti-dashboard"></i>
                                 </span>
                                 <span class="hide-menu">Dashboard</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" asp-action="Index" asp-controller="Products" aria-expanded="false">
+                            <a id="products" class="sidebar-link" asp-action="Index" asp-controller="Products"
+                                aria-expanded="false">
                                 <span>
                                     <i class="ti ti-shopping-cart"></i>
                                 </span>
@@ -60,26 +67,28 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" asp-action="Index" asp-controller="Categories"
+                            <a id="categories" class="sidebar-link" asp-action="Index" asp-controller="Categories"
                                 aria-expanded="false">
                                 <span>
-                                    <i class="ti ti-currency-dollar"></i>
+                                    <i class="ti ti-category"></i>
                                 </span>
                                 <span class="hide-menu">Categories</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" asp-action="Index" asp-controller="Scales" aria-expanded="false">
+                            <a id="scales" class="sidebar-link" asp-action="Index" asp-controller="Scales"
+                                aria-expanded="false">
                                 <span>
-                                    <i class="ti ti-cpu"></i>
+                                    <i class="ti ti-dimensions"></i>
                                 </span>
                                 <span class="hide-menu">Scales</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" asp-action="Index" asp-controller="Banners" aria-expanded="false">
+                            <a id="banners" class="sidebar-link" asp-action="Index" asp-controller="Banners"
+                                aria-expanded="false">
                                 <span>
-                                    <i class="ti ti-activity-heartbeat"></i>
+                                    <i class="ti ti-slideshow"></i>
                                 </span>
                                 <span class="hide-menu">Banners</span>
                             </a>
@@ -100,27 +109,6 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="ti ti-bell-ringing"></i>
-                                        <div class="notification bg-primary rounded-circle"></div>
-                                    </a>
-                                    <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up"
-                                        aria-labelledby="drop2">
-                                        <div class="d-flex align-items-center justify-content-between py-3 px-7">
-                                            <h5 class="mb-0 fs-5 fw-semibold">Notifications</h5>
-                                            <span class="badge bg-primary rounded-4 px-3 py-1 lh-sm">5 new</span>
-                                        </div>
-                                        <div class="message-body" data-simplebar>
-
-                                        </div>
-                                        <div class="py-6 px-7 mb-1">
-                                            <button class="btn btn-outline-primary w-100"> See All Notifications
-                                            </button>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li class="nav-item dropdown">
                                     <a class="nav-link pe-0" href="javascript:void(0)" id="drop1"
                                         data-bs-toggle="dropdown" aria-expanded="false">
                                         <div class="d-flex align-items-center">
@@ -140,10 +128,12 @@
                                                 <img src="~/Template/dist/images/profile/user-1.jpg"
                                                     class="rounded-circle" width="80" height="80" alt="" />
                                                 <div class="ms-3">
-                                                    <h5 class="mb-1 fs-3">Mathew Anderson</h5>
-                                                    <span class="mb-1 d-block text-dark">Designer</span>
+                                                    <h5 class="mb-1 fs-3">@User.FindFirstValue(ClaimTypes.Email)</h5>
+                                                    <span
+                                                        class="mb-1 d-block text-dark">@User.FindFirstValue(ClaimTypes.Role)</span>
                                                     <p class="mb-0 d-flex text-dark align-items-center gap-2">
-                                                        <i class="ti ti-mail fs-4"></i> info@modernize.com
+                                                        <i class="ti ti-mail fs-4"></i>
+                                                        @User.FindFirstValue(ClaimTypes.Email)
                                                     </p>
                                                 </div>
                                             </div>
@@ -166,7 +156,7 @@
             </header>
             <!-- Header End -->
             <div class="container-fluid">
-                <main role="main" class="pb-3">
+                <main role="main" class="">
                     @RenderBody()
                 </main>
             </div>
@@ -184,11 +174,15 @@
     <script src="~/Template/dist/js/app-style-switcher.js"></script>
     <script src="~/Template/dist/js/sidebarmenu.js"></script>
     <script src="~/Template/dist/js/custom.js"></script>
+    <script src="~/Template/dist/libs/prismjs/prism.js"></script>
+    <script src="~/Template/dist/libs/quill/dist/quill.min.js"></script>
+
     <!-- current page js files -->
     <script src="~/js/Banner.js"></script>
     <script src="~/js/Modal.js"></script>
     <script src="~/js/Category.js"></script>
     <script src="~/js/Scale.js"></script>
+    <script src="~/js/Product.js"></script>
     @RenderSection("Scripts", required: false)
 </body>
 

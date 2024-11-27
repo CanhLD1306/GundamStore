@@ -22,7 +22,7 @@ namespace GundamStore.Services
             _firebaseStorageService = firebaseStorageService ?? throw new InvalidOperationException("FirebaseStorageService is not initialized.");
         }
 
-        public async Task<List<Banner>> ListAllBannersAsync()
+        public async Task<List<Banner>> GetAllBannersAsync()
         {
             return await _context.Banners!
                             .Where(b => !b.IsDeleted)
@@ -46,7 +46,7 @@ namespace GundamStore.Services
 
         public async Task<long> InsertBannerAsync(IFormFile fileImage, string description)
         {
-            var banners = await ListAllBannersAsync();
+            var banners = await GetAllBannersAsync();
 
             if (banners.Count >= 5)
             {
@@ -71,8 +71,8 @@ namespace GundamStore.Services
                 {
                     ImageURL = imageUrl,
                     Description = description,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                     CreatedBy = await _userService.GetUserId(),
                     UpdatedBy = await _userService.GetUserId(),
                     IsDeleted = false
@@ -96,7 +96,7 @@ namespace GundamStore.Services
             try
             {
                 banner.Description = description;
-                banner.UpdatedAt = DateTime.Now;
+                banner.UpdatedAt = DateTime.UtcNow;
                 banner.UpdatedBy = await _userService.GetUserId();
                 await _context.SaveChangesAsync();
                 return true;
@@ -113,7 +113,7 @@ namespace GundamStore.Services
 
             try
             {
-                banner.UpdatedAt = DateTime.Now;
+                banner.UpdatedAt = DateTime.UtcNow;
                 banner.UpdatedBy = await _userService.GetUserId();
                 banner.IsDeleted = true;
                 await _context.SaveChangesAsync();

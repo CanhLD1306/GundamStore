@@ -7,17 +7,6 @@
         <div class="row align-items-center">
             <div class="col-9">
                 <h4 class="fw-semibold mb-8">Product</h4>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a class="text-muted "
-                                href="@Url.Action("Index", "Dashboard", new { area = "Admin" })">Dashboard</a>
-                        </li>
-                        <li class="breadcrumb-item" aria-current="page">
-                            Product
-                        </li>
-                    </ol>
-                </nav>
             </div>
             <div class="col-3">
                 <div class="text-center mb-n5">
@@ -28,30 +17,32 @@
     </div>
 </div>
 
-<div class="product-list">
-    <div class="d-flex justify-content-between align-items-center mb-9">
+<div class="action-btn layout-top-spacing mb-7 d-flex align-items-center justify-content-between">
+    <div class="mb-0 fs-5">
         <form class="position-relative">
-            <input type="text" class="form-control search-chat py-2 ps-5" id="text-srh"
-                placeholder="Search Product">
+            <input type="text" class="form-control search-chat py-2 ps-5" id="searchInput"
+                placeholder="Search category">
             <i class="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
         </form>
     </div>
-    <div class="table-responsive border rounded">
-        <table class="table align-middle text-nowrap mb-0">
-            <thead>
-                <tr>
-                    <th scope="col"><h6 class="fs-3 fw-semibold mb-0">Product</h6></th>
-                    <th scope="col"><h6 class="fs-3 fw-semibold mb-0">Category</h6></th>
-                    <th scope="col"><h6 class="fs-3 fw-semibold mb-0">Scale</h6></th>
-                    <th scope="col"><h6 class="fs-3 fw-semibold mb-0">Status</h6></th>
-                    <th scope="col"><h6 class="fs-3 fw-semibold mb-0">Price</h6></th>
-                    <th scope="col"><h6 class="fs-3 fw-semibold mb-0">Sold</h6></th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                
-            </tbody>
-        </table>
-    </div>
+    <button type="button" class="btn btn-primary" onclick="window.location.href='@Url.Action("Create", "Products")'">Add
+        Product</button>
 </div>
+
+<div id="product-list-container">
+
+</div>
+
+<div id="modal-Container">
+
+</div>
+
+@section Scripts {
+    <script>
+        var DeleteProductUrl = '@Url.Action("Delete", "Products", new { area = "Admin" })'
+        var DeleteProductConfirmUrl = '@Url.Action("DeleteConfirm", "Products", new { area = "Admin" })'
+        $(document).ready(function () {
+            GetAllProducts();
+        });
+    </script>
+}

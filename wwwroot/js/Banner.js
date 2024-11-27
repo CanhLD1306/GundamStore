@@ -1,8 +1,8 @@
-var GetAllBannersUrl = 'Banners/ListAllBanners';
-var CreateBannerUrl = 'Banners/Create';
-var UpdateBannerUrl = 'Banners/Edit/';
-var DeleteBannerUrl = 'Banners/Delete/';
-var DeleteBannerConfirmUrl = 'Banners/DeleteConfirm/';
+const GetAllBannersUrl = 'Banners/ListAllBanners';
+const CreateBannerUrl = 'Banners/Create';
+const UpdateBannerUrl = 'Banners/Edit/';
+const DeleteBannerUrl = 'Banners/Delete/';
+const DeleteBannerConfirmUrl = 'Banners/DeleteConfirm/';
 
 
 // Open Create Banner Modal
@@ -41,9 +41,9 @@ function ShowDeleteBannerModal(id) {
 }
 
 function CreateBanner() {
-  var formData = new FormData();
-  var fileImage = $("#fileImage")[0].files[0];
-  var description = $("#description").val();
+  const formData = new FormData();
+  const fileImage = $("#fileImage")[0].files[0];
+  const description = $("#description").val();
 
   if (!fileImage) {
     document.getElementById("fileHelp").textContent = "Please upload file image.";
@@ -75,8 +75,8 @@ function CreateBanner() {
 }
 
 function UpdateBanner(id) {
-  var formData = new FormData();
-  var description = $("#description").val();
+  const formData = new FormData();
+  const description = $("#description").val();
 
   formData.append("description", description);
 
@@ -122,10 +122,10 @@ function DeleteBannerConfirm(id)
 }
 
 function previewImage() {
-  var fileInput = document.getElementById("fileImage");
-  var preview = document.getElementById("preview");
-  var fileType = fileInput.files[0].type;
-  var allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  const fileInput = document.getElementById("fileImage");
+  const preview = document.getElementById("preview");
+  const fileType = fileInput.files[0].type;
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
 
   if($.inArray(fileType, allowedTypes) === -1) {
     document.getElementById("fileHelp").textContent = "Invalid file format. Please upload file image."
@@ -149,6 +149,7 @@ function previewImage() {
 function GetAllBanners(){
   $.ajax({
     url: GetAllBannersUrl,
+    type: "GET",
     success: function(data) {
         $('#banner-list-container').html(data);
     },
@@ -158,12 +159,3 @@ function GetAllBanners(){
   });
 }
 
-$(document).ready(function () {
-  $("#addBannerModal").on("hidden.bs.modal", function () {
-    $(this).find("form")[0].reset();
-    $("#preview").attr("src", "").hide();
-    document.getElementById("fileHelp").textContent = "";
-  });
-
-  GetAllBanners();
-});

@@ -19,7 +19,7 @@ namespace GundamStore.Services
         }
 
 
-        public async Task<List<Scale>> ListAllScalesAsync()
+        public async Task<List<Scale>> GetAllScalesAsync()
         {
             return await _context.Scales!
                             .Where(c => !c.IsDeleted)
@@ -27,7 +27,7 @@ namespace GundamStore.Services
                             .ToListAsync();
         }
 
-        public async Task<IPagedList<Scale>> ListAllScalesAsync(string searchString, int page, int pageSize)
+        public async Task<IPagedList<Scale>> GetScalesAsync(string searchString, int page, int pageSize)
         {
 
 
@@ -73,8 +73,8 @@ namespace GundamStore.Services
                 {
                     Name = name,
                     Description = description,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                     CreatedBy = await _userService.GetUserId(),
                     UpdatedBy = await _userService.GetUserId(),
                     IsDeleted = false
@@ -92,18 +92,18 @@ namespace GundamStore.Services
 
         public async Task<bool> UpdateScaleAsync(long id, string name, string description)
         {
+            var scale = await GetScaleByIdAsync(id);
+
             if (name == null)
             {
                 throw new ArgumentException("Name is required.");
             }
 
-            var scale = await GetScaleByIdAsync(id);
-
             try
             {
                 scale.Name = name;
                 scale.Description = description;
-                scale.UpdatedAt = DateTime.Now;
+                scale.UpdatedAt = DateTime.UtcNow;
                 scale.UpdatedBy = await _userService.GetUserId();
                 await _context.SaveChangesAsync();
                 return true;
@@ -120,7 +120,7 @@ namespace GundamStore.Services
 
             try
             {
-                scale.UpdatedAt = DateTime.Now;
+                scale.UpdatedAt = DateTime.UtcNow;
                 scale.UpdatedBy = await _userService.GetUserId();
                 scale.IsDeleted = true;
                 await _context.SaveChangesAsync();

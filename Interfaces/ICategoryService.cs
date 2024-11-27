@@ -6,8 +6,8 @@ namespace GundamStore.Interfaces
 {
     public interface ICategoryService
     {
-        Task<List<Category>> ListAllCategoriesAsync();
-        Task<IPagedList<Category>> ListAllCategoriesAsync(string searchString, int page, int pageSize);
+        Task<List<Category>> GetAllCategoriesAsync();
+        Task<IPagedList<Category>> GetCategoriesAsync(string searchString, int page, int pageSize);
         Task<long> InsertCategoryAsync(string name, string description);
         Task<Category> GetCategoryByIdAsync(long id);
         Task<bool> UpdateCategoryAsync(long id, string name, string description);

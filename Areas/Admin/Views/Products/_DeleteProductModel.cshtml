@@ -1,0 +1,20 @@
+@model GundamStore.Models.Product
+
+<div class="modal fade" id="deleteProductModal" tabindex="-1" role="dialog" aria-labelledby="deleteProductModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form>
+                <div class="modal-body">
+                    <p class="fs-5 fw-semibold text-center mt-2">Are you sure want to delete this product ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="CloseModal('deleteProductModal')">Cancel</button>
+                    <button type="button" class="btn btn-danger"
+                        onclick="DeleteProductConfirm(@Model.Id)">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

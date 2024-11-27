@@ -30,7 +30,7 @@ namespace GundamStore.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> ListAllScales()
         {
-            var scales = await _scaleService.ListAllScalesAsync();
+            var scales = await _scaleService.GetAllScalesAsync();
             return PartialView("_ListScales", scales);
         }
 

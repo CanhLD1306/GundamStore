@@ -128,31 +128,6 @@ function DeleteScaleConfirm(id)
   });
 }
 
-function previewImage() {
-  var fileInput = document.getElementById("fileImage");
-  var preview = document.getElementById("preview");
-  var fileType = fileInput.files[0].type;
-  var allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-
-  if($.inArray(fileType, allowedTypes) === -1) {
-    document.getElementById("fileHelp").textContent = "Invalid file format. Please upload file image."
-    fileInput.value = "";
-    return false;
-  }
-
-
-  if (fileInput.files && fileInput.files[0]) {
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-
-      preview.src = e.target.result;
-      preview.style.display = "block";
-    };
-    reader.readAsDataURL(fileInput.files[0]);
-  }
-}
-
 function GetAllScales(){
   $.ajax({
     url: GetAllScalesUrl,
@@ -169,12 +144,4 @@ document.getElementById("name")?.addEventListener("input", function () {
   document.getElementById("nameError").textContent = "";
 })
 
-$(document).ready(function () {
-  $("#addScaleModal").on("hidden.bs.modal", function () {
-    $(this).find("form")[0].reset();
-    $("#preview").attr("src", "").hide();
-    document.getElementById("fileHelp").textContent = "";
-  });
 
-  GetAllScales();
-});

@@ -1,8 +1,8 @@
-var GetAllCategoriesUrl = 'Categories/ListAllCategories';
-var CreateCategoryUrl = 'Categories/Create';
-var UpdateCategoryUrl = 'Categories/Edit/';
-var DeleteCategoryUrl = 'Categories/Delete/';
-var DeleteCategoryConfirmUrl = 'Categories/DeleteConfirm/';
+const GetAllCategoriesUrl = 'Categories/ListAllCategories';
+const CreateCategoryUrl = 'Categories/Create';
+const UpdateCategoryUrl = 'Categories/Edit/';
+const DeleteCategoryUrl = 'Categories/Delete/';
+const DeleteCategoryConfirmUrl = 'Categories/DeleteConfirm/';
 
 
 // Open Create Category Modal
@@ -41,9 +41,9 @@ function ShowDeleteCategoryModal(id) {
 }
 
 function CreateCategory() {
-  var formData = new FormData();
-  var name = $("#name").val();
-  var description = $("#description").val();
+  const formData = new FormData();
+  const name = $("#name").val();
+  const description = $("#description").val();
 
   if (!name) {
     document.getElementById("nameError").textContent = "This field is required.";
@@ -75,9 +75,9 @@ function CreateCategory() {
 }
 
 function UpdateCategory(id) {
-  var formData = new FormData();
-  var name = $("#name").val();
-  var description = $("#description").val();
+  const formData = new FormData();
+  const name = $("#name").val();
+  const description = $("#description").val();
 
   if (!name) {
     document.getElementById("nameError").textContent = "This field is required.";
@@ -128,31 +128,6 @@ function DeleteCategoryConfirm(id)
   });
 }
 
-function previewImage() {
-  var fileInput = document.getElementById("fileImage");
-  var preview = document.getElementById("preview");
-  var fileType = fileInput.files[0].type;
-  var allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-
-  if($.inArray(fileType, allowedTypes) === -1) {
-    document.getElementById("fileHelp").textContent = "Invalid file format. Please upload file image."
-    fileInput.value = "";
-    return false;
-  }
-
-
-  if (fileInput.files && fileInput.files[0]) {
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-
-      preview.src = e.target.result;
-      preview.style.display = "block";
-    };
-    reader.readAsDataURL(fileInput.files[0]);
-  }
-}
-
 function GetAllCategories(){
   $.ajax({
     url: GetAllCategoriesUrl,
@@ -168,13 +143,3 @@ function GetAllCategories(){
 document.getElementById("name")?.addEventListener("input", function () {
   document.getElementById("nameError").textContent = "";
 })
-
-$(document).ready(function () {
-  $("#addCategoryModal").on("hidden.bs.modal", function () {
-    $(this).find("form")[0].reset();
-    $("#preview").attr("src", "").hide();
-    document.getElementById("fileHelp").textContent = "";
-  });
-
-  GetAllCategories();
-});

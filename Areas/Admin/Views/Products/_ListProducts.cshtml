@@ -1,0 +1,101 @@
+@using X.PagedList.Mvc.Core
+@model IEnumerable<GundamStore.Dto.ProductWithImageDto>
+
+<div class="table-responsive border rounded mb-4">
+    <table class="table align-middle text-nowrap mb-0">
+        <thead class="text-dark fs-3">
+            <tr>
+                <th scope="col">
+                    <h6 class="fs-3 fw-semibold mb-0">Product</h6>
+                </th>
+                <th scope="col">
+                    <h6 class="fs-3 fw-semibold mb-0">Brand</h6>
+                </th>
+                <th scope="col">
+                    <h6 class="fs-3 fw-semibold mb-0">Price</h6>
+                </th>
+                <th scope="col">
+                    <h6 class="fs-3 fw-semibold mb-0">Quantity</h6>
+                </th>
+                <th scope="col">
+                    <h6 class="fs-3 fw-semibold mb-0">Status</h6>
+                </th>
+                using X.PagedList.Mvc.Core;
+                using X.PagedList.Mvc.Core;
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="@product.ImageDefault" class="rounded" alt="..." width="100">
+                            <div class="ms-3">
+                                <h6 class="fw-semibold mb-0 fs-4">@product.Name</h6>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <h6 class="fw-semibold mb-0 fs-4">@product.Brand </h6>
+                    </td>
+                    <td>
+                        <h6 class="fw-semibold mb-0 fs-4">@product.Price$</h6>
+                    </td>
+                    <td>
+                        @if (product.StockQuantity > 0)
+                        {
+                            <h6 class="fw-semibold mb-0 fs-4">@product.StockQuantity</h6>
+                        }
+                        else
+                        {
+                            <span class="mb-1 badge rounded-pill bg-danger">Out of stock</span>
+                        }
+                    </td>
+                    <td>
+                        @if (product.IsActive)
+                        {
+                            <span class="mb-1 badge rounded-pill bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="mb-1 badge rounded-pill bg-danger">Inactive</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-warning"
+                            onclick="window.location.href='@Url.Action("Edit", "Products", new { id = product.Id })'">Edit</button>
+                        <button type="button" class="btn btn-danger" onclick="DeleteOnclick(@product.Id)">Delete</button>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<ul class="pagination">
+    <li class="page-item">
+        <a class="page-link link" href="#" aria-label="Previous">
+            <span aria-hidden="true">
+                <i class="ti ti-chevrons-left fs-4"></i>
+            </span>
+        </a>
+    </li>
+    <li class="page-item">
+        <a class="page-link link" href="#">1</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link link" href="#">2</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link link" href="#">3</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link link" href="#" aria-label="Next">
+            <span aria-hidden="true">
+                <i class="ti ti-chevrons-right fs-4"></i>
+            </span>
+        </a>
+    </li>
+</ul>

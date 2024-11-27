@@ -22,7 +22,7 @@ namespace GundamStore.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> ListAllCategories()
         {
-            var categories = await _categoryService.ListAllCategoriesAsync();
+            var categories = await _categoryService.GetAllCategoriesAsync();
             return PartialView("_ListCategories", categories);
         }
 

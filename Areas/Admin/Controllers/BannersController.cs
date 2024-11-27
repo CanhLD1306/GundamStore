@@ -25,7 +25,7 @@ namespace GundamStore.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> ListAllBanners()
         {
-            var banners = await _bannerService.ListAllBannersAsync();
+            var banners = await _bannerService.GetAllBannersAsync();
             return PartialView("_ListBanners", banners);
         }
 

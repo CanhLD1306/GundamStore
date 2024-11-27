@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using Microsoft.Extensions.DependencyInjection;
+using GudandStore.Interfaces;
 
 namespace GundamStore
 {
@@ -36,6 +37,8 @@ namespace GundamStore
             builder.Services.AddScoped<IScaleService, ScaleService>();
             builder.Services.AddScoped<IBannerService, BannerService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IProductImageService, ProductImageService>();
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
             builder.Services.AddHttpContextAccessor();

@@ -19,7 +19,7 @@ namespace GundamStore.Services
             _userService = userService ?? throw new InvalidOperationException("UserService is not initialized.");
         }
 
-        public async Task<List<Category>> ListAllCategoriesAsync()
+        public async Task<List<Category>> GetAllCategoriesAsync()
         {
             return await _context.Categories!
                             .Where(c => !c.IsDeleted)
@@ -27,7 +27,7 @@ namespace GundamStore.Services
                             .ToListAsync();
         }
 
-        public async Task<IPagedList<Category>> ListAllCategoriesAsync(string searchString, int page, int pageSize)
+        public async Task<IPagedList<Category>> GetCategoriesAsync(string searchString, int page, int pageSize)
         {
 
             IQueryable<Category> category = _context.Categories!.Where(c => !c.IsDeleted);
@@ -71,8 +71,8 @@ namespace GundamStore.Services
                 {
                     Name = name,
                     Description = description,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                     CreatedBy = await _userService.GetUserId(),
                     UpdatedBy = await _userService.GetUserId(),
                     IsDeleted = false
@@ -89,18 +89,18 @@ namespace GundamStore.Services
         }
         public async Task<bool> UpdateCategoryAsync(long id, string name, string description)
         {
+            var category = await GetCategoryByIdAsync(id);
+
             if (name == null)
             {
                 throw new ArgumentException("Name is required.");
             }
 
-            var category = await GetCategoryByIdAsync(id);
-
             try
             {
                 category.Name = name;
                 category.Description = description;
-                category.UpdatedAt = DateTime.Now;
+                category.UpdatedAt = DateTime.UtcNow;
                 category.UpdatedBy = await _userService.GetUserId();
                 await _context.SaveChangesAsync();
                 return true;
@@ -116,7 +116,7 @@ namespace GundamStore.Services
 
             try
             {
-                category.UpdatedAt = DateTime.Now;
+                category.UpdatedAt = DateTime.UtcNow;
                 category.UpdatedBy = await _userService.GetUserId();
                 category.IsDeleted = true;
                 await _context.SaveChangesAsync();
