@@ -1,6 +1,3 @@
-const GetAllProductsUrl = 'Products/ListAllProducts';
-const EditProductUrl = 'Products/Edit/';
-
 const imageModel = {
     id: 0,
     url: "",

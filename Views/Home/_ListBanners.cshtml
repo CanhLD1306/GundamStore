@@ -1,0 +1,22 @@
+@model IEnumerable<GundamStore.Models.Banner>
+
+
+<div id="carouselExampleInterval" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        @foreach (var banner in Model)
+        {
+            if (banner == Model.First())
+            {
+                <div class="carousel-item active" data-bs-interval="5000">
+                    <img src="@banner.ImageURL" class="d-block w-100" style="height: 500px; object-fit: contain;" />
+                </div>
+            }
+            else
+            {
+                <div class="carousel-item" data-bs-interval="5000">
+                    <img src="@banner.ImageURL" class="d-block w-100" style="height: 500px; object-fit: contain;" />
+                </div>
+            }
+        }
+    </div>
+</div>

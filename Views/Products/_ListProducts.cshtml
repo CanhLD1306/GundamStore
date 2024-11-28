@@ -1,0 +1,65 @@
+@model IEnumerable<GundamStore.Dto.ProductWithImageDto>
+
+
+
+<div class="row">
+    @foreach (var product in Model)
+    {
+        <div class="col-sm-6 col-xl-4">
+            <div class="card hover-img overflow-hidden rounded-2">
+                <div class="position-relative">
+                    <a href="javascript:void(0)"><img src="@product.ImageDefault" class="card-img-top rounded-0"
+                            style="width: 100%; height: 200px ;object-fit: contain;"></a>
+                    <a href="javascript:void(0)"
+                        class="bg-primary rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3"
+                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add To Cart"><i
+                            class="ti ti-basket fs-4"></i></a>
+                </div>
+                <div class="card-body pt-3 p-4">
+                    <h6 class="fw-semibold fs-4">@product.Name</h6>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h6 class="fw-semibold fs-4 mb-0">@product.Price$</h6>
+                        <ul class="list-unstyled d-flex align-items-center mb-0">
+                            <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
+                            <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
+                            <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
+                            <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
+                            <li><a class="" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
+                        </ul>
+                    </div>
+                    <div class="mt-3">
+                        <a href="javascript:void(0)" class="btn d-block btn-primary px-5 py-8 mb-2 mb-sm-0">Buy Now</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+</div>
+
+<ul class="pagination">
+    <li class="page-item">
+        <a class="page-link link" href="#" aria-label="Previous">
+            <span aria-hidden="true">
+                <i class="ti ti-chevrons-left fs-4"></i>
+            </span>
+        </a>
+    </li>
+    <li class="page-item">
+        <a class="page-link link" href="#">1</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link link" href="#">2</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link link" href="#">3</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link link" href="#" aria-label="Next">
+            <span aria-hidden="true">
+                <i class="ti ti-chevrons-right fs-4"></i>
+            </span>
+        </a>
+    </li>
+</ul>

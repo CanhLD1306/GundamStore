@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using GundamStore.Common;
-using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
 
 namespace GundamStore.Areas.Admin.Controllers

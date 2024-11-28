@@ -30,6 +30,7 @@ namespace GundamStore.Services
         {
             var productImages = await _context.ProductImages!
                                         .Where(pi => !pi.IsDeleted && pi.ProductId == id)
+                                        .OrderByDescending(pi => pi.CreatedAt)
                                         .ToListAsync();
 
             return productImages;

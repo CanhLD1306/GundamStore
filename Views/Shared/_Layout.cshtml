@@ -2,16 +2,23 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - GundamStore</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/GundamStore.styles.css" asp-append-version="true" />
+    <!--  Title -->
+    <title>Gundam Store</title>
+    <!--  Required Meta Tag -->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="handheldfriendly" content="true" />
+    <meta name="MobileOptimized" content="width" />
+    <meta name="description" content="GundamStore" />
+    <meta name="author" content="" />
+    <meta name="keywords" content="GundamStore" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
     <!--  Favicon -->
-    <link rel="shortcut icon" type="image/png" href="~/Template/dist/images/logos/logo.png" />
+    <link rel="shortcut icon" type="image/png" href="~/Template/dist/images/logos/logo-base.png" />
     <!-- Core Css -->
+    <link rel="stylesheet" href="~/Template/dist/libs/owl.carousel/dist/assets/owl.carousel.min.css">
+
     <link id="themeColors" rel="stylesheet" href="~/Template/dist/css/style.min.css" />
 
     <!-- Toastr CSS -->
@@ -20,58 +27,75 @@
 </head>
 
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/Template/dist/images/logos/logo.png" width="40" alt="">
-                    Gundam Store
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home"
-                                asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
+    <header style="border-bottom: 1px solid #ccc;">
+        <div class="container-fluid">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <ul class="navbar-nav quick-links d-none d-lg-flex justify-content-center align-items-center">
+                    <li class="nav-item dropdown-hover d-none d-lg-block">
+                        <a class="nav-link fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">
+                            <img src="~/Template/dist/images/logos/logo.png" width="240" alt="">
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown-hover d-none d-lg-block">
+                        <a class="nav-link" asp-controller="Products" asp-action="Index">Products</a>
+                    </li>
+                    <li class="nav-item dropdown-hover d-none d-lg-block">
+                        <a class="nav-link" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    </li>
+                </ul>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <partial name="_LoginPartial" />
+                    </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
+        </div>
+
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="container mt-5">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <div class="offcanvas offcanvas-end shopping-cart" tabindex="-1" id="offcanvasRight"
+        aria-labelledby="offcanvasRightLabel">
+        <div class="offcanvas-header py-4">
+            <h5 class="offcanvas-title fs-5 fw-semibold" id="offcanvasRightLabel">Shopping Cart</h5>
+        </div>
+        <div class="offcanvas-body h-100 px-4 pt-0" data-simplebar>
+
+        </div>
+    </div>
+
+    <footer class="border-top footer text-muted mt-5">
         <div class="container">
             &copy; 2024 - GundamStore - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/Template/dist/libs/simplebar/dist/simplebar.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script src="~/Template/dist/libs/jquery/dist/jquery.min.js"></script>
     <script src="~/Template/dist/libs/simplebar/dist/simplebar.min.js"></script>
     <script src="~/Template/dist/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Template/dist/libs/owl.carousel/dist/owl.carousel.min.js"></script>
+    <script src="~/Template/dist/js/productDetail.js"></script>
 
     <script src="~/Template/dist/js/app.min.js"></script>
     <script src="~/Template/dist/js/app.init.js"></script>
     <script src="~/Template/dist/js/app-style-switcher.js"></script>
     <script src="~/Template/dist/js/sidebarmenu.js"></script>
     <script src="~/Template/dist/js/custom.js"></script>
+    <script src="~/Template/dist/libs/prismjs/prism.js"></script>
     <script src="~/Template/dist/js/apps/chat.js"></script>
-    <script src="~/Template/dist/js/plugins/toastr.init.js"></script>
+
+    <script src="~/js/Banner.js"></script>
+    <script src="~/js/Modal.js"></script>
+    <script src="~/js/Category.js"></script>
+    <script src="~/js/Scale.js"></script>
+    <script src="~/js/Product.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -39,8 +39,10 @@
 
 @section Scripts {
     <script>
-        var DeleteProductUrl = '@Url.Action("Delete", "Products", new { area = "Admin" })'
-        var DeleteProductConfirmUrl = '@Url.Action("DeleteConfirm", "Products", new { area = "Admin" })'
+        const GetAllProductsUrl = '@Url.Action("ListAllProducts", "Products", new { area = "Admin" })';
+        const EditProductUrl = '@Url.Action("Edit", "Products", new { area = "Admin" })';
+        const DeleteProductUrl = '@Url.Action("Delete", "Products", new { area = "Admin" })';
+        const DeleteProductConfirmUrl = '@Url.Action("DeleteConfirm", "Products", new { area = "Admin" })';
         $(document).ready(function () {
             GetAllProducts();
         });

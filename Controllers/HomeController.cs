@@ -9,14 +9,15 @@ using System.Net.Mail;
 
 namespace GundamStore.Controllers
 {
-    public class HomeController : Controller
+
+    public class HomeController : BaseController
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly IEmailSenderService _emailSenderService;
-        public HomeController(ILogger<HomeController> logger, IEmailSenderService emailSenderService)
+
+        private readonly IBannerService _bannerService;
+
+        public HomeController(IBannerService bannerService)
         {
-            _logger = logger;
-            _emailSenderService = emailSenderService;
+            _bannerService = bannerService ?? throw new ArgumentNullException(nameof(bannerService));
         }
 
         public IActionResult Index()
@@ -24,11 +25,17 @@ namespace GundamStore.Controllers
             return View();
         }
 
+        public async Task<IActionResult> ListAllBanners()
+        {
+            var banners = await _bannerService.GetAllBannersAsync();
+            return PartialView("_ListBanners", banners);
+        }
+
         public IActionResult Privacy()
         {
             return View();
         }
-       
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

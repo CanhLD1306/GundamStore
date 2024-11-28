@@ -8,11 +8,10 @@ namespace GundamStore.Data
     {
         public static async Task Initialize(IServiceProvider serviceProvider)
         {
-            // Lấy UserManager và RoleManager từ DI container
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            // Tạo các role mặc định
+
             string[] roles = { "Admin", "Customer" };
 
             foreach (var role in roles)
@@ -23,9 +22,9 @@ namespace GundamStore.Data
                 }
             }
 
-            // Tạo tài khoản admin mặc định (nếu chưa có)
+
             var email = "Canhld1306@gmail.com";
-            var password = "Admin@123"; // Mật khẩu phải tuân thủ các quy tắc bảo mật
+            var password = "Admin@123";
 
             if (await userManager.FindByEmailAsync(email) == null)
             {
@@ -43,12 +42,11 @@ namespace GundamStore.Data
 
                 if (result.Succeeded)
                 {
-                    // Gán role Admin cho tài khoản này
+
                     await userManager.AddToRoleAsync(user,"Admin");
                 }
                 else
                 {
-                    // Xử lý lỗi nếu tạo tài khoản không thành công
                     throw new InvalidOperationException($"Failed to create admin user: {string.Join(", ", result.Errors)}");
                 }
             }

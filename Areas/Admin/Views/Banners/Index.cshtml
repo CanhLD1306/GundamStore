@@ -65,6 +65,13 @@
 
 @section Scripts {
   <script>
+    const GetAllBannersUrl = '@Url.Action("ListAllBanners", "Products", new { area = "Admin" })';
+    const CreateBannerUrl = '@Url.Action("Create", "Products", new { area = "Admin" })';
+    const UpdateBannerUrl = '@Url.Action("Edit", "Products", new { area = "Admin" })';
+    const DeleteBannerUrl = '@Url.Action("Delete", "Products", new { area = "Admin" })';
+    const DeleteBannerConfirmUrl = '@Url.Action("DeleteConfirm", "Products", new { area = "Admin" })';
+
+
     $(document).ready(function () {
       $("#addBannerModal").on("hidden.bs.modal", function () {
         $(this).find("form")[0].reset();

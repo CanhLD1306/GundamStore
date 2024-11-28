@@ -1,8 +1,4 @@
-const GetAllBannersUrl = 'Banners/ListAllBanners';
-const CreateBannerUrl = 'Banners/Create';
-const UpdateBannerUrl = 'Banners/Edit/';
-const DeleteBannerUrl = 'Banners/Delete/';
-const DeleteBannerConfirmUrl = 'Banners/DeleteConfirm/';
+
 
 
 // Open Create Banner Modal
